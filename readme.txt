@@ -28,8 +28,8 @@ Utilises OID4VP to enhance security of the authentication process by verifying u
 
 === More References and Resources ===
 
-1. List the available data points in Affinidi User Vault [here](https://docs.affinidi.com/docs/affinidi-vault/affinidi-vault-data/#user-profile-individual-data-points).
-2. Requesting User Data from Affinidi User Vault [here](https://docs.affinidi.com/docs/affinidi-vault/requesting-user-data/).
+1. List the available data points in Affinidi Vault [here](https://docs.affinidi.com/docs/affinidi-vault/affinidi-vault-data/#user-profile-individual-data-points).
+2. Requesting User Data from Affinidi Vault [here](https://docs.affinidi.com/docs/affinidi-vault/requesting-user-data/).
 3. Restrict User Login for your Application [here](https://docs.affinidi.com/docs/use-cases/restrict-user-login/).
 4. For Information on the latest updates and improvements to the Affinidi Trust Network, refer to [Changelog](https://docs.affinidi.com/changelog/) page.
 
