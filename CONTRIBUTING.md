@@ -1,4 +1,4 @@
-# Contributing to Affinidi Login for WordPress
+# Contributing to Affinidi Login - Passwordless Authentication for Wordpress
 
 ## Getting started
 

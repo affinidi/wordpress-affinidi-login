@@ -1,5 +1,5 @@
-=== Affinidi Login for WordPress ===
-Contributors: afffrancisp
+=== Affinidi Login - Passwordless Authentication for Wordpress ===
+Contributors: affinidi, afffrancisp
 Tags: authentication, security, multi-factor, oauth2, sso
 Requires at least: 6.4
 Tested up to: 6.4
@@ -26,7 +26,13 @@ Leverages OID4VP to enable users to control their data and digital identity, sel
 
 Utilises OID4VP to enhance security of the authentication process by verifying user authenticity without the need for direct communication with the provider, reducing risk of tampering and ensuring data integrity.
 
-=== More References and Resources ===
+= Shortcode =
+
+You can use the Affinidi Login as a shortcode in your editor. Just add the following to display the button in the page:
+    
+    [affinidi_login]
+
+== More References and Resources ==
 
 1. List the available data points in Affinidi Vault [here](https://docs.affinidi.com/docs/affinidi-vault/affinidi-vault-data/#user-profile-individual-data-points).
 2. Requesting User Data from Affinidi Vault [here](https://docs.affinidi.com/docs/affinidi-vault/requesting-user-data/).
@@ -78,5 +84,5 @@ We are here to help. Please [Contact Us](https://www.affinidi.com/get-in-touch) 
 
 = 1.0.0 =
 
-* Initial release of Affinidi Login for WordPress.
+* Initial release of Affinidi Login - Passwordless Authentication for Wordpress.
 * Passwordless authentication using Affinidi Login.

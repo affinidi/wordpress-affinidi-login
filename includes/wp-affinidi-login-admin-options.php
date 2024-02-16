@@ -47,97 +47,103 @@ class WP_Affinidi_Login_Admin
     public function options_do_page()
     {
         ?>
-        <div class="wrap">
-            <h2>Affinidi Login Configuration</h2>
-            <p>This plugin is meant to be used with <a href="https://www.affinidi.com/product/affinidi-login" target="_blank">Affinidi Login</a> and uses <a href="https://oauth.net/2/pkce/" target="_blank">PKCE</a> extension of OAuth 2.0 standard.</p>
-            <p>When activated, this plugin will redirect all login requests to your affinidi page.</p>
-            <p>
-                <strong>NOTE:</strong> If you want to add a
-                custom link anywhere in your theme simply link to
-                <strong><?= site_url('?auth=affinidi'); ?></strong>
-                if the user is not logged in.
-            </p>
-            <div id="accordion">
-                <h4>Step 1: Setup</h4>
-                <div>
-                    <strong>Setting up Affinidi Login</strong>
-                    <ol>
-                        <li>Login to <a
-                                    href="https://portal.affinidi.com" target="_blank">Affinidi Portal</a> and go to the Affinidi Login service.
-                        </li>
-                        <li>Create a Login Configuration and set the following fields:
-                            <p>
-                            <strong>Redirect URIs:</strong>
-                            <code><?= site_url('?auth=affinidi'); ?></code></p>
-                            <p>
-                            <strong>Auth method:</strong> <code>None</code></p>
-                        </li>
-                        <li>Copy and paste the Client ID and Issuer URL in Step 2 below.</li>
-                    </ol>
+        <div class="affinidi-login-settings">
+            <div class="admin-settings-header">
+                <h1>Affinidi Login</h1>
+                <a class="affinidi-login-doc" href="https://docs.affinidi.com/docs/affinidi-login/" target="_blank">
+                    Documentation
+                </a>
+            </div>
+            <div class="admin-settings-inside">
+                <p>This plugin is meant to be used with <a href="https://www.affinidi.com/product/affinidi-login" target="_blank">Affinidi Login</a> and uses <a href="https://oauth.net/2/pkce/" target="_blank">PKCE</a> extension of OAuth 2.0 standard.</p>
+                <p>
+                    <strong>NOTE:</strong> If you want to add a
+                    custom link anywhere in your theme simply link to
+                    <strong><?= site_url('?auth=affinidi'); ?></strong>
+                    if the user is not logged in.
+                </p>
+                <div id="accordion">
+                    <h3>Step 1: Setup</h3>
+                    <div>
+                        <strong>Create a Login Configuration</strong>
+                        <ol>
+                            <li>Login to <a
+                                        href="https://portal.affinidi.com" target="_blank">Affinidi Portal</a> and go to the Affinidi Login service.
+                            </li>
+                            <li>Create a Login Configuration and set the following fields:
+                                <p>
+                                <strong>Redirect URIs:</strong>
+                                <code><?= site_url('?auth=affinidi'); ?></code></p>
+                                <p>
+                                <strong>Auth method:</strong> <code>None</code></p>
+                            </li>
+                            <li>Copy and paste the Client ID and Issuer URL in Step 2 below.</li>
+                        </ol>
+                    </div>
+                    <h3 id="sso-configuration">Step 2: Configure</h3>
+                    <div>
+                        <form method="post" action="options.php">
+                            <?php settings_fields('affinidi_options'); ?>
+                            <table class="form-table">
+                            <tr valign="top">
+                                    <th scope="row">Activate Affinidi Login</th>
+                                    <td>
+                                        <input type="checkbox"
+                                            name="<?= self::OPTIONS_NAME ?>[active]"
+                                            value="1" <?= affinidi_get_option('active') == 1 ? 'checked="checked"' : ''; ?> />
+                                    </td>
+                                </tr>
+
+                                <tr valign="top">
+                                    <th scope="row">Client ID</th>
+                                    <td>
+                                        <input type="text" class="regular-text" name="<?= self::OPTIONS_NAME ?>[client_id]" min="10"
+                                            value="<?= affinidi_get_option('client_id') ?>"/>
+                                    </td>
+                                </tr>
+
+                                <tr valign="top">
+                                    <th scope="row">Issuer URL</th>
+                                    <td>
+                                        <input type="text" class="regular-text" name="<?= self::OPTIONS_NAME ?>[backend]" min="10"
+                                            value="<?= affinidi_get_option('backend'); ?>"/>
+                                        <p class="description">Example: https://[YOUR_PROJECT_ID]].apse1.login.affinidi.io</p>
+                                    </td>
+                                </tr>
+
+                                <tr valign="top">
+                                    <th scope="row">Redirect to the dashboard after signing in</th>
+                                    <td>
+                                        <input type="checkbox"
+                                            name="<?= self::OPTIONS_NAME ?>[redirect_to_dashboard]"
+                                            value="1" <?= affinidi_get_option('redirect_to_dashboard') == 1 ? 'checked="checked"' : ''; ?> />
+                                    </td>
+                                </tr>
+                                <tr valign="top">
+                                    <th scope="row">Restrict flow to log in only (new users will not be allowed to signup)</th>
+                                    <td>
+                                        <input type="checkbox"
+                                            name="<?= self::OPTIONS_NAME ?>[login_only]"
+                                            value="1" <?= affinidi_get_option('login_only') == 1 ? 'checked="checked"' : ''; ?> />
+                                    </td>
+                                </tr>
+                                <tr valign="top">
+                                    <th scope="row">Require all visitors to log-in</th>
+                                    <td>
+                                        <input type="checkbox"
+                                            name="<?= self::OPTIONS_NAME ?>[auto_sso]"
+                                            value="1" <?= affinidi_get_option('auto_sso') == 1 ? 'checked="checked"' : ''; ?> />
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p class="submit">
+                                <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>"/>
+                            </p>
+                    </div>
+
+                    </form>
                 </div>
-                <h4 id="sso-configuration">Step 2: Configuration</h4>
-                <div>
-                    <form method="post" action="options.php">
-                        <?php settings_fields('affinidi_options'); ?>
-                        <table class="form-table">
-                        <tr valign="top">
-                                <th scope="row">Activate Affinidi Login</th>
-                                <td>
-                                    <input type="checkbox"
-                                        name="<?= self::OPTIONS_NAME ?>[active]"
-                                        value="1" <?= affinidi_get_option('active') == 1 ? 'checked="checked"' : ''; ?> />
-                                </td>
-                            </tr>
-
-                            <tr valign="top">
-                                <th scope="row">Client ID</th>
-                                <td>
-                                    <input type="text" class="regular-text" name="<?= self::OPTIONS_NAME ?>[client_id]" min="10"
-                                           value="<?= affinidi_get_option('client_id') ?>"/>
-                                </td>
-                            </tr>
-
-                            <tr valign="top">
-                                <th scope="row">Issuer URL</th>
-                                <td>
-                                    <input type="text" class="regular-text" name="<?= self::OPTIONS_NAME ?>[backend]" min="10"
-                                           value="<?= affinidi_get_option('backend'); ?>"/>
-                                    <p class="description">Example: https://[YOUR_PROJECT_ID]].apse1.login.affinidi.io</p>
-                                </td>
-                            </tr>
-
-                            <tr valign="top">
-                                <th scope="row">Redirect to the dashboard after signing in</th>
-                                <td>
-                                    <input type="checkbox"
-                                           name="<?= self::OPTIONS_NAME ?>[redirect_to_dashboard]"
-                                           value="1" <?= affinidi_get_option('redirect_to_dashboard') == 1 ? 'checked="checked"' : ''; ?> />
-                                </td>
-                            </tr>
-                            <tr valign="top">
-                                <th scope="row">Restrict flow to log in only (new users will not be allowed to signup)</th>
-                                <td>
-                                    <input type="checkbox"
-                                           name="<?= self::OPTIONS_NAME ?>[login_only]"
-                                           value="1" <?= affinidi_get_option('login_only') == 1 ? 'checked="checked"' : ''; ?> />
-                                </td>
-                            </tr>
-                            <tr valign="top">
-                                <th scope="row">Require all visitors to log-in</th>
-                                <td>
-                                    <input type="checkbox"
-                                           name="<?= self::OPTIONS_NAME ?>[auto_sso]"
-                                           value="1" <?= affinidi_get_option('auto_sso') == 1 ? 'checked="checked"' : ''; ?> />
-                                </td>
-                            </tr>
-                        </table>
-                        
-                        <p class="submit">
-                            <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>"/>
-                        </p>
-                </div>
-
-                </form>
             </div>
         </div>
         <div style="clear:both;"></div>

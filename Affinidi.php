@@ -15,7 +15,6 @@ class Affinidi
     protected $default_settings = [
         'active'               => 0,
         'client_id'            => '',
-        'client_secret'        => '',
         'backend'              => '',
         'organization'         => '',
         'server_oauth_trigger' => 'oauth',

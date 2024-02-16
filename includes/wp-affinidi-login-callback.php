@@ -16,8 +16,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$log_path = plugin_dir_path(__FILE__).'debug.log';
-
 // Grab a copy of the options and set the redirect location.
 $user_redirect = affinidi_get_user_redirect_url();
 
@@ -59,8 +57,8 @@ if (!isset($_GET['code']) && !isset($_GET['error'])) {
 // Check for error 
 if (empty($_GET['code']) && !empty($_GET['error'])) {
     // log error description on server side
-    $log_message = "error={$_GET['error']}&error_description={$_GET['error_description']}".PHP_EOL;
-    error_log($log_message, 3, $log_path);
+    $log_message = "Affinidi Login: error={$_GET['error']}&error_description={$_GET['error_description']}".PHP_EOL;
+    error_log($log_message);
     // redirect user with error code
     wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed&error={$_GET['error']}");
     
@@ -91,16 +89,20 @@ if (!empty($_GET['code'])) {
     );
 
     if (is_wp_error($response)) {
+        // log error description
         $error_message = $response->get_error_message();
-        exit("Something went wrong: {$error_message}");
+        error_log($error_message);
+        // redirect user with error code
+        wp_safe_redirect(wp_login_url() . "?message=wp_error_affinidi_login");
+        exit;
     }
 
     $tokens = json_decode(wp_remote_retrieve_body($response));
 
     if (isset($tokens->error)) {
         // log error description on server side
-        $log_message = "error={$tokens->error}&error_description={$tokens->error_description}".PHP_EOL;
-        error_log($log_message, 3, $log_path);
+        $log_message = "Affinidi Login: error={$tokens->error}&error_description={$tokens->error_description}".PHP_EOL;
+        error_log($log_message);
         // redirect user with error code
         wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed&error={$tokens->error}");
         exit;
@@ -166,12 +168,6 @@ if (!empty($_GET['code'])) {
         // Trigger action when a user is logged in.
         // This will help allow extensions to be used without modifying the core plugin.
         do_action('affinidi_user_login', $info, 1);
-
-        // User ID 1 is not allowed
-        // if ('1' == $user->ID) {
-        //     wp_safe_redirect(home_url() . '?message=affinidi_id_not_allowed');
-        //     exit;
-        // }
 
         $user_id = $user->ID;
     }

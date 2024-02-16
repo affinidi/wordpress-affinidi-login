@@ -1,4 +1,4 @@
-# Affinidi Login for WordPress
+# Affinidi Login - Passwordless Authentication for Wordpress
 
 AUGMENT EXPERIENCES WITH A SAFER, SIMPLER AND MORE PRIVATE WAY TO LOGIN
 
@@ -10,6 +10,13 @@ A paradigm shift in the registration and sign-in process, Affinidi Login is a ga
 |---|---|---|
 | Offers a secure and user-friendly alternative to traditional password-based authentication by eliminating passwords and thus removing the vulnerability to password-related attacks such as phishing and credential stuffing. | Leverages OID4VP to enable users to control their data and digital identity, selectively share their credentials and authenticate themselves across multiple platforms and devices without relying on a centralised identity provider. | Utilises OID4VP to enhance security of the authentication process by verifying user authenticity without the need for direct communication with the provider, reducing risk of tampering and ensuring data integrity. |
 
+## Shortcode ##
+
+You can use the Affinidi Login as a shortcode in your editor. Just add the following to display the button in the page:
+    
+```
+[affinidi_login]
+```
 
 ## More References and Resources ##
 
@@ -57,5 +64,5 @@ We are here to help. Please [Contact Us](https://www.affinidi.com/get-in-touch) 
 
 ### 1.0.0 ###
 
-* Initial release of Affinidi Login for WordPress.
+* Initial release of Affinidi Login - Passwordless Authentication for Wordpress.
 * Passwordless authentication using Affinidi Login.

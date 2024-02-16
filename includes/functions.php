@@ -58,7 +58,7 @@ function get_affinidi_login_url(string $redirect = ''): string
         'client_id'     => affinidi_get_option('client_id'),
         'code_challenge' => $code_challenge,
         'code_challenge_method' => 'S256',
-        'token_endpoint_auth_method' => 'client_secret_post',
+        'token_endpoint_auth_method' => 'none',
         'redirect_uri'  => site_url('?auth=affinidi'),
         'state'         => urlencode($user_redirect)
     ];
@@ -75,29 +75,47 @@ function affinidi_login_form_button()
 {
     ?>
     <style>
-        .affinidi {
-    position: relative;
-    display: flex !important;
-    gap: 1rem;
-    align-items: center;
-    justify-content: center;
-    background-color: rgb(29, 88, 252) !important;
-    border: 2px solid rgb(29, 88, 252);
-    border-radius: 48px !important;
-    box-sizing: border-box !important;
-    transition: all 0.125s ease-in-out 0s;
-    font-size: 14pt !important;
-    font-family: Figtree;
-    font-weight: 500;
-    line-height: 2.75rem !important;
+        @import url('https://fonts.googleapis.com/css2?family=Figtree&display=swap');
+        .affinidi-login {
+            background-color: #1d58fc !important;
+            color: #ffffff !important;
+            box-sizing: border-box !important;
+            transition: all 0.125s ease-in-out 0s;
+            width: 188px !important;
+            height: 48px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 12px !important;
+            margin: 0 auto !important;
+            padding: 12px 20px !important;
+            object-fit: contain !important;
+            border-radius: 12px !important;
+
+            flex-grow: 0 !important;
+            font-family: Figtree !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            font-stretch: normal !important;
+            font-style: normal !important;
+            line-height: 1.25 !important;
+            letter-spacing: 0.6px;
+            text-align: left !important;
         }
     </style>
+    <div class="affinidi-login-wrapper">
     <p style="text-align:center; margin:5px;">Log in <b>passwordless</b> with</p>
-    <a style="color:#FFF; width:100%; text-align:center; margin-bottom:1em;" class="affinidi button button-primary button-large"
+    <a style="color:#FFF; width:100%; text-align:center; margin-bottom:1em;" class="affinidi-login button"
        href="<?php echo site_url('?auth=affinidi'); ?>">
-       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAAAwCAYAAACrF9JNAAAAAXNSR0IArs4c6QAAAl1JREFUaEPtms1SgzAQx0lLR+pJvelRHwSYOuP4Cr5MwY8H0Bdq6E3fwaue/DhZndLGWVpsyvCxBAiJlCPNJvvLbpp/whKjpqdnHnnQFSF7NukPnbRul+GnD++Xxhc1wm+KHdq0Thm2bVo7UsUYwHrmwVi0D7aYUcZ+gmX4Hk1Q1iMf0rScPjkcZ0VLFBiinAUrFbI/OJ7UDZeclDB8cZOpLAfStBzTPJmIRqmsHaTxYv7qxnaNQ1Zdd2UB4/YRKPvwIaqNQspIz6JJgPStmkXZ/66m5fSM/dStoMixun+3HdsOaBCI9ltpCxEdtKwdY4y5rutSStF7Kz+GNpAACKBlJygSKCJGsm0gkjCmKKhWkAAqkrbaQYpE8w8yFtiyUxEz3mL+tqWPR6NLn06fMKZRmxWkZEWD9m7dcD573jIJpo/G+cUVupsIsi1Vg/UyCQl2AAmwmCeCrCqbMANVaZMGeX17b9zcPaC6JaqnKlCkQcL7wfAMB6l6qtYCqYIILwpHViSxKUtUX495kURDFs2iCr/Hsi7pi+/7vud5ufdDm31SBZIcH3aQu0iu0kM7gc5n9W5NcrPRjS1EZzGAFemkE7JOV4Fe5kzZkaOWpodm7DFrs0924fojvgJRVcLWc5GlKt3aL16gV7qSVJmTh/z3l8tYrZoMmDYCXSRNY1htIAkhwr7uPsKqIN6b/ZweJ3RLQoGvAKl6o4jL84YKlLK2LeklLrwjTR/L+LIWflw5kUxMed2wWXCbFdNyAWFeVWSRiorq6RAVk61EMs15/kt1WuVkXBEJthiwOtP1F+VEe4wNzA9zAAAAAElFTkSuQmCC" width="28.5" height="24" alt="Affinidi Logo">Affinidi Login</a>
-    <div style="clear:both;"></div>
-    <p style="text-align:center;">- or with passwords below -</p>
+       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="24" viewBox="0 0 30 24" fill="none">
+            <path d="M3.927 20.281A11.966 11.966 0 0 0 12.61 24c3.416 0 6.499-1.428 8.684-3.719H3.926h.001zM21.295 6.762H1.813A11.933 11.933 0 0 0 .707 10.48h20.588V6.762zM21.293 3.719A11.967 11.967 0 0 0 12.609 0a11.966 11.966 0 0 0-8.683 3.719h17.367zM21.295 13.521H.707c.167 1.319.548 2.57 1.106 3.719h19.482v-3.718zM23.41 6.762c.558 1.148.94 2.4 1.106 3.718h4.78V6.762H23.41z" fill="#fff"/>
+            <path d="M29.293 20.281h-8V24h8V20.28zM23.41 17.24h5.886v-3.718h-4.78a11.933 11.933 0 0 1-1.106 3.718zM29.293 0h-8v3.719h8V0z" fill="#fff"/>
+            <path d="M24.514 10.48a11.934 11.934 0 0 0-1.106-3.72 12.017 12.017 0 0 0-2.115-3.041v16.563a12.05 12.05 0 0 0 2.115-3.042 11.935 11.935 0 0 0 1.2-5.24c0-.516-.031-1.023-.094-1.522v.001z" fill="#040822"/>
+        </svg>
+       Affinidi Login</a>
+       <div style="clear:both;"></div>
+    </div>
     <?php
 }
 // Fires following the ‘Password’ field in the login form.
@@ -114,16 +132,21 @@ add_action('login_message', 'affinidi_login_form_button');
 function affinidi_login_button_shortcode($atts)
 {
     $a = shortcode_atts([
-        'type'   => 'primary',
         'title'  => 'Affinidi Login',
-        'class'  => 'sso-button',
+        'class'  => 'affinidi-login button',
         'target' => '_blank',
         'text'   => 'Affinidi Login'
     ], $atts);
 
-    return '<a class="' . $a['class'] . '" href="' . site_url('?auth=affinidi') . '" title="' . $a['title'] . '" target="' . $a['target'] . '">' . $a['text'] . '</a>';
+    return '<a class="' . $a['class'] . '" href="' . site_url('?auth=affinidi') . '" title="' . $a['title'] . '" target="' . $a['target'] . '">
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="24" viewBox="0 0 30 24" fill="none">
+        <path d="M3.927 20.281A11.966 11.966 0 0 0 12.61 24c3.416 0 6.499-1.428 8.684-3.719H3.926h.001zM21.295 6.762H1.813A11.933 11.933 0 0 0 .707 10.48h20.588V6.762zM21.293 3.719A11.967 11.967 0 0 0 12.609 0a11.966 11.966 0 0 0-8.683 3.719h17.367zM21.295 13.521H.707c.167 1.319.548 2.57 1.106 3.719h19.482v-3.718zM23.41 6.762c.558 1.148.94 2.4 1.106 3.718h4.78V6.762H23.41z" fill="#fff"/>
+        <path d="M29.293 20.281h-8V24h8V20.28zM23.41 17.24h5.886v-3.718h-4.78a11.933 11.933 0 0 1-1.106 3.718zM29.293 0h-8v3.719h8V0z" fill="#fff"/>
+        <path d="M24.514 10.48a11.934 11.934 0 0 0-1.106-3.72 12.017 12.017 0 0 0-2.115-3.041v16.563a12.05 12.05 0 0 0 2.115-3.042 11.935 11.935 0 0 0 1.2-5.24c0-.516-.031-1.023-.094-1.522v.001z" fill="#040822"/>
+    </svg>
+    ' . $a['text'] . '</a>';
 }
-add_shortcode('sso_button', 'affinidi_login_button_shortcode');
+add_shortcode('affinidi_login', 'affinidi_login_button_shortcode');
 
 /**
  * Get user login redirect.

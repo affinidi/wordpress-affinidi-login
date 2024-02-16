@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree&display=swap');
+
+.affinidi-login {
+    background-color: #1d58fc !important;
+    color: #ffffff !important;
+    box-sizing: border-box !important;
+    transition: all 0.125s ease-in-out 0s;
+    width: 188px !important;
+    height: 48px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 auto !important;
+    padding: 12px 20px !important;
+    object-fit: contain !important;
+    border-radius: 12px !important;
+
+    flex-grow: 0 !important;
+    font-family: Figtree !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    font-stretch: normal !important;
+    font-style: normal !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.6px;
+    text-align: left !important;
+    text-decoration: none !important;
+}

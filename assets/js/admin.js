@@ -1,8 +1,4 @@
 (function ($) {
-    $("#accordion").accordion({
-        heightStyle: "content"
-    });
-
     $(document).ready(function(){
         var hash = window.location.hash;
         var anchor = $('#' + hash);
