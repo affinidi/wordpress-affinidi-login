@@ -11,7 +11,7 @@
  * @category  General
  * @author    Affinidi
  * @copyright 2024 Affinidi
- * @license   http://www.apache.org/licenses/LICENSE-2.0
+ * @license   https://github.com/affinidi/wordpress-affinidi-login/blob/main/LICENSE
  * @link      https://www.affinidi.com/product/affinidi-login
  *
  * @wordpress-plugin
@@ -24,9 +24,8 @@
  * Author:            Affinidi
  * Author URI:        https://affinidi.com
  * Text Domain:       affinidi-login-for-wordpress
- * License:           Apache License 2.0
- * License URI:       http://www.apache.org/licenses/LICENSE-2.0
- * GitHub Plugin URI: https://github.com/affinidi/wordpress-affinidi-login
+ * License:           MIT
+ * License URI:       https://github.com/affinidi/wordpress-affinidi-login/blob/main/LICENSE
  */
 
  // ABSPATH prevent public user to directly access your .php files through URL.

@@ -5,8 +5,8 @@ Requires at least: 6.4
 Tested up to: 6.4
 Requires PHP: 7.4
 Stable tag: 1.0.0
-License: Apache License 2.0
-License URI: http://www.apache.org/licenses/LICENSE-2.0
+License: MIT
+License URI: https://github.com/affinidi/wordpress-affinidi-login/blob/main/LICENSE
 
 AUGMENT EXPERIENCES WITH A SAFER, SIMPLER AND MORE PRIVATE WAY TO LOGIN
 
