@@ -32,7 +32,7 @@ You can use the Affinidi Login as a shortcode in your editor. Just add the follo
     
     [affinidi_login]
 
-== More References and Resources ==
+= More References and Resources =
 
 1. List the available data points in Affinidi Vault [here](https://docs.affinidi.com/docs/affinidi-vault/affinidi-vault-data/#user-profile-individual-data-points).
 2. Requesting User Data from Affinidi Vault [here](https://docs.affinidi.com/docs/affinidi-vault/requesting-user-data/).
@@ -78,11 +78,10 @@ To get started, use the [Affinidi CLI](https://github.com/affinidi/affinidi-cli)
 
 = How can I reach out for further support? =
 
-We are here to help. Please [Contact Us](https://www.affinidi.com/get-in-touch) and relevant personal will reach out to assist you further.
+We are here to help. Please [Contact Us](https://www.affinidi.com/get-in-touch) and relevant personnel will reach out to assist you further.
 
 == Changelog ==
 
 = 1.0.0 =
 
 * Initial release of Affinidi Login - Passwordless Authentication for Wordpress.
-* Passwordless authentication using Affinidi Login.

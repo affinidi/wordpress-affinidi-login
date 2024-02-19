@@ -58,11 +58,10 @@ To get started, use the [Affinidi CLI](https://github.com/affinidi/affinidi-cli)
 
 ### How can I reach out for further support? ###
 
-We are here to help. Please [Contact Us](https://www.affinidi.com/get-in-touch) and relevant personal will reach out to assist you further.
+We are here to help. Please [Contact Us](https://www.affinidi.com/get-in-touch) and relevant personnel will reach out to assist you further.
 
 ## Changelog ##
 
 ### 1.0.0 ###
 
 * Initial release of Affinidi Login - Passwordless Authentication for Wordpress.
-* Passwordless authentication using Affinidi Login.
