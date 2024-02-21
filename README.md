@@ -1,4 +1,4 @@
-# Affinidi Login - Passwordless Authentication for Wordpress
+# Affinidi Login - Passwordless Authentication for WordPress
 
 AUGMENT EXPERIENCES WITH A SAFER, SIMPLER AND MORE PRIVATE WAY TO LOGIN
 

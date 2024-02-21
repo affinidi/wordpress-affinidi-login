@@ -1,5 +1,5 @@
-=== Affinidi Login - Passwordless Authentication for Wordpress ===
-Contributors: affinidi, afffrancisp
+=== Affinidi Login - Passwordless Authentication for WordPress ===
+Contributors: affinidi
 Tags: authentication, security, multi-factor, oauth2, sso
 Requires at least: 6.4
 Tested up to: 6.4
