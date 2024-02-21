@@ -25,7 +25,7 @@ if (!empty($_GET['redirect_uri'])) {
 }
 
 // Authenticate Check and Redirect
-if (!isset($_GET['code']) && !isset($_GET['error'])) {
+if (!isset($_GET['code']) && !isset($_GET['error_description']) && !isset($_GET['state'])) {
 
     // generate code verifier and challenge
     $verifier_bytes = bin2hex(openssl_random_pseudo_bytes(32));
@@ -55,7 +55,7 @@ if (!isset($_GET['code']) && !isset($_GET['error'])) {
 }
 
 // Check for error 
-if (empty($_GET['code']) && !empty($_GET['error'])) {
+if (empty($_GET['code']) && !empty($_GET['error_description'])) {
     // log error description on server side
     $log_message = "Affinidi Login: error={$_GET['error']}&error_description={$_GET['error_description']}".PHP_EOL;
     error_log($log_message);
