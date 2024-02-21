@@ -129,7 +129,7 @@ function affinidi_login_form_button()
     <div class="affinidi-login-wrapper">
     <p style="text-align:center; margin:5px;">Log in <b>passwordless</b> with</p>
     <a style="margin:1em auto;" rel="nofollow" class="button" id="affinidi-login-m"
-       href="<?php echo site_url('?auth=affinidi'); ?>">Affinidi Login</a>
+       href="<?php echo esc_url(site_url('?auth=affinidi')); ?>">Affinidi Login</a>
        <div style="clear:both;"></div>
     </div>
     <?php

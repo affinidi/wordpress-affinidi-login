@@ -59,7 +59,7 @@ class WP_Affinidi_Login_Admin
                 <p>
                     <strong>NOTE:</strong> If you want to add a
                     custom link anywhere in your theme simply link to
-                    <strong><?= site_url('?auth=affinidi'); ?></strong>
+                    <strong><?php echo esc_url(site_url('?auth=affinidi')); ?></strong>
                     if the user is not logged in.
                 </p>
                 <div id="accordion">
@@ -73,7 +73,7 @@ class WP_Affinidi_Login_Admin
                             <li>Create a Login Configuration and set the following fields:
                                 <p>
                                 <strong>Redirect URIs:</strong>
-                                <code><?= site_url('?auth=affinidi'); ?></code></p>
+                                <code><?php echo esc_url(site_url('?auth=affinidi')); ?></code></p>
                                 <p>
                                 <strong>Auth method:</strong> <code>None</code></p>
                             </li>
@@ -89,24 +89,24 @@ class WP_Affinidi_Login_Admin
                                     <th scope="row">Activate Affinidi Login</th>
                                     <td>
                                         <input type="checkbox"
-                                            name="<?= self::OPTIONS_NAME ?>[active]"
-                                            value="1" <?= affinidi_get_option('active') == 1 ? 'checked="checked"' : ''; ?> />
+                                            name="<?php echo  esc_html(self::OPTIONS_NAME); ?>[active]"
+                                            value="1" <?php echo affinidi_get_option('active') == 1 ? 'checked="checked"' : ''; ?> />
                                     </td>
                                 </tr>
 
                                 <tr valign="top">
                                     <th scope="row">Client ID</th>
                                     <td>
-                                        <input type="text" class="regular-text" name="<?= self::OPTIONS_NAME ?>[client_id]" min="10"
-                                            value="<?= affinidi_get_option('client_id') ?>"/>
+                                        <input type="text" class="regular-text" name="<?php echo esc_html(self::OPTIONS_NAME); ?>[client_id]" min="10"
+                                            value="<?php echo esc_html(affinidi_get_option('client_id')); ?>"/>
                                     </td>
                                 </tr>
 
                                 <tr valign="top">
                                     <th scope="row">Issuer URL</th>
                                     <td>
-                                        <input type="text" class="regular-text" name="<?= self::OPTIONS_NAME ?>[backend]" min="10"
-                                            value="<?= affinidi_get_option('backend'); ?>"/>
+                                        <input type="text" class="regular-text" name="<?php echo esc_html(self::OPTIONS_NAME); ?>[backend]" min="10"
+                                            value="<?php echo esc_html(affinidi_get_option('backend')); ?>"/>
                                         <p class="description">Example: https://[YOUR_PROJECT_ID]].apse1.login.affinidi.io</p>
                                     </td>
                                 </tr>
@@ -115,21 +115,21 @@ class WP_Affinidi_Login_Admin
                                     <th scope="row">Redirect to the dashboard after signing in</th>
                                     <td>
                                         <input type="checkbox"
-                                            name="<?= self::OPTIONS_NAME ?>[redirect_to_dashboard]"
-                                            value="1" <?= affinidi_get_option('redirect_to_dashboard') == 1 ? 'checked="checked"' : ''; ?> />
+                                            name="<?php echo esc_html(self::OPTIONS_NAME); ?>[redirect_to_dashboard]"
+                                            value="1" <?php echo affinidi_get_option('redirect_to_dashboard') == 1 ? 'checked="checked"' : ''; ?> />
                                     </td>
                                 </tr>
                                 <tr valign="top">
                                     <th scope="row">Restrict flow to log in only (new users will not be allowed to signup)</th>
                                     <td>
                                         <input type="checkbox"
-                                            name="<?= self::OPTIONS_NAME ?>[login_only]"
-                                            value="1" <?= affinidi_get_option('login_only') == 1 ? 'checked="checked"' : ''; ?> />
+                                            name="<?php echo esc_html(self::OPTIONS_NAME) ?>[login_only]"
+                                            value="1" <?php echo affinidi_get_option('login_only') == 1 ? 'checked="checked"' : ''; ?> />
                                     </td>
                                 </tr>
                             </table>
                             <p class="submit">
-                                <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>"/>
+                                <input type="submit" class="button-primary" value="<?php esc_html_e('Save Changes') ?>"/>
                             </p>
                     </div>
 

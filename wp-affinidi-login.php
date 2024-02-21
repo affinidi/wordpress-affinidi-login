@@ -43,9 +43,9 @@ add_action('wp_loaded', 'affinidi_register_files');
 function affinidi_register_files()
 {
     // Register a CSS stylesheet.
-    wp_register_style('affinidi_admin', plugins_url('/assets/css/affinidi-login.css', __FILE__));
+    wp_register_style('affinidi_admin', plugins_url('/assets/css/affinidi-login.css', __FILE__), array(), '1.0.0');
     // Register a new script.
-    wp_register_script('affinidi_admin', plugins_url('/assets/js/affinidi-login.js', __FILE__));
+    wp_register_script('affinidi_admin', plugins_url('/assets/js/affinidi-login.js', __FILE__), array(), '1.0.0', false);
 }
 
 add_action('admin_head', 'affinidi_register_admin_files');
@@ -54,10 +54,10 @@ function affinidi_register_admin_files()
 {
     // Register a CSS stylesheet.
     $styleUrl = plugins_url('/assets/css/admin.css', __FILE__);
-    echo "<link rel='stylesheet' type='text/css' href='$styleUrl' />\n";
+    echo "<link rel='stylesheet' type='text/css' href='" . esc_url($styleUrl) . "' />\n";
     // Register a new script.
     $jsUrl = plugins_url('/assets/js/admin.js', __FILE__);
-    echo "<script src='$jsUrl'></script>\n";
+    echo "<script src='" . esc_url($jsUrl) . "'></script>\n";
 }
 
 $affinidi = new Affinidi();

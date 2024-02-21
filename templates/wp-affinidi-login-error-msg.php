@@ -15,6 +15,6 @@ if ($message == 'affinidi_login_only') {
 
 if (!empty($alert_message)) : ?>
     <div class="error">
-        <p class="alertbar"><?= $alert_message . ' <a href="' . site_url('?auth=affinidi') . '">Please try again</a>'?></p>
+        <p class="alertbar"><?php esc_html($alert_message) . ' <a href="' . esc_url(site_url('?auth=affinidi')) . '">Please try again</a>'?></p>
     </div>
 <?php endif; ?>
