@@ -85,11 +85,8 @@ class Affinidi
 
     public function logout()
     {
-        $auto_sso = absint(affinidi_get_option('auto_sso'));
-        if (!$auto_sso) {
-            wp_redirect(home_url());
-            die();
-        }
+        wp_redirect(home_url());
+        die();
     }
 
     /**

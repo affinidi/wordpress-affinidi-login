@@ -50,7 +50,7 @@ class WP_Affinidi_Login_Admin
         <div class="affinidi-login-settings">
             <div class="admin-settings-header">
                 <h1>Affinidi Login</h1>
-                <a class="affinidi-login-doc" href="https://docs.affinidi.com/docs/affinidi-login/" target="_blank">
+                <a class="affinidi-login-doc" href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/" target="_blank">
                     Documentation
                 </a>
             </div>
@@ -127,16 +127,7 @@ class WP_Affinidi_Login_Admin
                                             value="1" <?= affinidi_get_option('login_only') == 1 ? 'checked="checked"' : ''; ?> />
                                     </td>
                                 </tr>
-                                <tr valign="top">
-                                    <th scope="row">Require all visitors to log-in</th>
-                                    <td>
-                                        <input type="checkbox"
-                                            name="<?= self::OPTIONS_NAME ?>[auto_sso]"
-                                            value="1" <?= affinidi_get_option('auto_sso') == 1 ? 'checked="checked"' : ''; ?> />
-                                    </td>
-                                </tr>
                             </table>
-                            
                             <p class="submit">
                                 <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>"/>
                             </p>

@@ -38,6 +38,7 @@ You can use the Affinidi Login as a shortcode in your editor. Just add the follo
 2. Requesting User Data from Affinidi Vault [here](https://docs.affinidi.com/docs/affinidi-vault/requesting-user-data/).
 3. Restrict User Login for your Application [here](https://docs.affinidi.com/docs/use-cases/restrict-user-login/).
 4. For Information on the latest updates and improvements to the Affinidi Trust Network, refer to [Changelog](https://docs.affinidi.com/changelog/) page.
+5. Learn more about the plugin [here](https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/).
 
 = Troubleshooting =
 

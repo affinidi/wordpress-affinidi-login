@@ -59,14 +59,10 @@ class WP_Affinidi_Login_Rewrites
         global $pagenow;
         $message = $wp_query->get('message');
         if ($pagenow == 'index.php' && isset($message)) {
-            $options['auto_sso'] = 0;
             require_once(AFFINIDI_PLUGIN_DIR . '/templates/wp-affinidi-login-error-msg.php');
         }
 
-        // Auto SSO for users that are not logged in.
-        $auto_sso = isset($options['auto_sso']) && $options['auto_sso'] == 1 && !is_user_logged_in();
-
-        if ($auth == 'affinidi' || $auto_sso) {
+        if ($auth == 'affinidi') {
             require_once(AFFINIDI_PLUGIN_DIR . '/includes/wp-affinidi-login-callback.php');
             exit;
         }
