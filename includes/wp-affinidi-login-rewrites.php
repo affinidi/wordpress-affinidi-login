@@ -34,10 +34,6 @@ class WP_Affinidi_Login_Rewrites
 
     public function template_redirect_intercept(): void
     {
-        $activated = absint(affinidi_get_option('active'));
-        if (!$activated) {
-            return;
-        }
         global $wp_query;
         $auth = $wp_query->get('auth');
         $options = get_option('affinidi_options');

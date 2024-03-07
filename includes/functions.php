@@ -6,10 +6,14 @@ defined('ABSPATH') or die('No script kiddies please!');
 function defaults()
 {
     return [
-        'client_id'             => '',
-        'backend'               => '',
-        'redirect_to_dashboard' => 0,
-        'login_only'            => 0,
+        'client_id'            => '',
+        'backend'              => '',
+        'redirect_user_origin' => 0,
+        'enable_ecommerce_support' => '',
+        'ecommerce_sync_address_info' => 'billing',
+        'ecommerce_show_al_button' => 'top_form',
+        'affinidi_login_loginform_header' => 'Log in passwordless with',
+        'affinidi_login_regform_header' => 'Sign up seamlessly with',
     ];
 }
 
@@ -73,6 +77,8 @@ function get_affinidi_login_url(string $redirect = ''): string
  */
 function affinidi_login_form_button()
 {
+
+    $redirect_to = affinidi_get_user_redirect_url();
     ?>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,600;1,600&display=swap');
@@ -103,6 +109,7 @@ function affinidi_login_form_button()
             font-style: normal;
             line-height: 1.25;
             letter-spacing: 0.6px;
+            text-decoration: none !important;
         }
 
         #affinidi-login-m:hover {
@@ -128,8 +135,8 @@ function affinidi_login_form_button()
     </style>
     <div class="affinidi-login-wrapper">
     <p style="text-align:center; margin:5px;">Log in <b>passwordless</b> with</p>
-    <a style="margin:1em auto;" rel="nofollow" class="button" id="affinidi-login-m"
-       href="<?php echo esc_url(site_url('?auth=affinidi')); ?>">Affinidi Login</a>
+    <a style="margin:1em auto;" rel="nofollow" class="affinidi-login" id="affinidi-login-m"
+       href="<?php echo esc_url(site_url('?auth=affinidi&state=' . $redirect_to)); ?>">Affinidi Login</a>
        <div style="clear:both;"></div>
     </div>
     <?php
@@ -145,19 +152,45 @@ add_action('login_message', 'affinidi_login_form_button');
  *
  * @return [type]       [description]
  */
-function affinidi_login_button_shortcode($atts)
+function affinidi_login_button_shortcode($atts = array())
 {
+    if (is_user_logged_in()) {
+        return;
+    }
+
     $a = shortcode_atts([
         'title'  => 'Affinidi Login',
-        'class'  => 'button',
+        'class'  => 'affinidi-login',
         'target' => '_self',
         'text'   => 'Affinidi Login'
     ], $atts);
 
-    return '<a id="affinidi-login-m" rel="nofollow" class="' . $a['class'] . '" href="' . site_url('?auth=affinidi') . '" title="' . $a['title'] . '" target="' . $a['target'] . '">' . $a['text'] . '</a>';
+    $redirect_to = affinidi_get_user_redirect_url();
+
+    return '<a id="affinidi-login-m" rel="nofollow" class="' . $a['class'] . '" href="' . site_url('?auth=affinidi&state='.$redirect_to) . '" title="' . $a['title'] . '" target="' . $a['target'] . '">' . $a['text'] . '</a>';
 }
 
 add_shortcode('affinidi_login', 'affinidi_login_button_shortcode');
+
+function get_wc_login_form_button($atts = array()) {
+
+    $options = array_shift(get_options(array('affinidi_options')));
+
+    $display_button_header = $options['affinidi_login_loginform_header'];
+
+    return '
+        <div class="form-affinidi-login"><div><p class="form-affinidi-login-header">' . $display_button_header . '</p></div><div>' . affinidi_login_button_shortcode($atts) . '</div></div>';
+}
+
+function get_wc_regs_form_button($atts = array()) {
+
+    $options = array_shift(get_options(array('affinidi_options')));
+
+    $display_button_header = $options['affinidi_login_regform_header'];
+
+    return '
+        <div class="form-affinidi-login"><div><p class="form-affinidi-login-header">' . $display_button_header . '</p></div><div>' . affinidi_login_button_shortcode($atts) . '</div></div>';
+}
 
 /**
  * Get user login redirect.
@@ -167,21 +200,218 @@ add_shortcode('affinidi_login', 'affinidi_login_button_shortcode');
  */
 function affinidi_get_user_redirect_url(): string
 {
-    $options           = get_option('affinidi_options');
-    // Retrieves the URL to the user’s dashboard.
-    $user_redirect_set = $options['redirect_to_dashboard'] == '1' ? 'wp-admin' : 'index.php';
-    $user_redirect     = apply_filters('affinidi_user_redirect_url', $user_redirect_set);
+    // Global WP instance
+    global $wp;
 
-    return $user_redirect;
-}
+    // Homepage as default redirect
+    $redirect_url = home_url();
 
-function extractProp($data, $name) {
-    $val = null;
-    foreach ($data as $customData) {
-        if (isset($customData[$name])) {
-            $val = $customData[$name];
-            break;
+    // Redirect users if directly logging-in from wp-login.php form or redirect to dashboard option is set
+    if ( $GLOBALS['pagenow'] == 'wp-login.php' ) {
+        $redirect_url = admin_url();
+    }
+
+    // Check if we are passing redirect_to value, use it
+    if ( isset( $_REQUEST['redirect_to'] ) ) {
+        $redirect_url = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+    } else {
+        // Get the current page of the user where the button is triggered (if redirect to dashboard is not set)
+        if ( affinidi_get_option('redirect_user_origin') == 1) {
+            if ( ! empty( $wp->request ) ) {
+                if ( ! empty( $wp->did_permalink ) && $wp->did_permalink == true ) {
+                    // build url from the current page with query strings attached
+                    $redirect_url = home_url( add_query_arg( $_GET, trailingslashit( $wp->request ) ) );
+                } else {
+                    $redirect_url = home_url( add_query_arg( null, null ) );
+                }
+            } else {
+                // homepage with query strings
+                if ( ! empty( $wp->query_string ) ) {
+                    $redirect_url = home_url( '?' . $wp->query_string );
+                }
+            }
         }
     }
-    return $val;
+
+    // generate random state
+    $state = md5( mt_rand() . microtime( true ) );
+    // store redirect_to transient info to options
+    $affinidi_state_values = array(
+        $state => array(
+            'redirect_to' => $redirect_url
+        )
+    );
+    set_transient("affinidi_user_redirect_to" . $state, $affinidi_state_values, 300);
+
+    return $state;
+
 }
+
+function extract_claim($idToken, $field, $isCustom = true) {
+    
+    if ($isCustom) {
+        return isset($idToken['custom'][$field]) ? $idToken['custom'][$field] : "";    
+    }
+    // return from top-level
+    return isset($idToken[$field]) ? $idToken[$field] : "";
+
+}
+
+function extract_user_info($info) {
+
+    // extract user info
+    $email = extract_claim($info, 'email', false);
+    $firstName = extract_claim($info, 'given_name', false);
+    $lastName = extract_claim($info, 'family_name', false);
+    $displayName = trim("{$firstName} {$lastName}");
+
+    return array(
+        'email' => $email,
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'display_name' => $displayName
+    );
+
+}
+
+function extract_contact_info($info) {
+    // get list of countries for transformation
+    include_once(AFFINIDI_PLUGIN_DIR . '/templates/countries-list.php');
+    // extract user info
+    $streetAddress = extract_claim($info['address'], 'street_address', false);
+    $locality = extract_claim($info['address'], 'locality', false);
+    $region = extract_claim($info['address'], 'region', false);
+    $postalCode = extract_claim($info['address'], 'postal_code', false);
+    $country = extract_claim($info['address'], 'country', false);
+    $phoneNumber = extract_claim($info, 'phone_number', false);
+
+    // get the country code
+    $country = array_search($country, $countries_list);
+
+    return array(
+        'address_1' => $streetAddress,
+        'city' => $locality,
+        'state' => $region,
+        'postcode' => $postalCode,
+        'country' => $country,
+        'phone' => $phoneNumber
+    );
+}
+
+function set_wc_billing_address($customer, $userInfo, $contactInfo) {
+    // set billing info
+    $customer->set_billing_first_name($userInfo['first_name']);
+    $customer->set_billing_last_name($userInfo['last_name']);
+    $customer->set_billing_email($userInfo['email']);
+    $customer->set_billing_phone($contactInfo['phone']);
+
+    $customer->set_billing_address($contactInfo['address_1']);
+    $customer->set_billing_city($contactInfo['city']);
+    $customer->set_billing_state($contactInfo['state']);
+    $customer->set_billing_postcode($contactInfo['postcode']);
+    $customer->set_billing_country($contactInfo['country']);
+
+    $customer->save();
+}
+
+function set_wc_shipping_address($customer, $userInfo, $contactInfo) {
+    // set billing info
+    $customer->set_shipping_first_name($userInfo['first_name']);
+    $customer->set_shipping_last_name($userInfo['last_name']);
+    $customer->set_shipping_phone($contactInfo['phone']);
+
+    $customer->set_shipping_address($contactInfo['address_1']);
+    $customer->set_shipping_city($contactInfo['city']);
+    $customer->set_shipping_state($contactInfo['state']);
+    $customer->set_shipping_postcode($contactInfo['postcode']);
+    $customer->set_shipping_country($contactInfo['country']);
+
+    $customer->save();
+}
+
+function sync_address_info($userId, $userInfo, $contactInfo, $isSignup) {
+    // is WC support enabled?
+    if (is_woocommerce_activated()) {
+        // Get the WC_Customer instance object from user ID
+        $customer = new WC_Customer( $userId );
+        // sync address info from Vault
+        if ($isSignup) {
+            set_wc_billing_address($customer, $userInfo, $contactInfo);
+            set_wc_shipping_address($customer, $userInfo, $contactInfo);
+        } else if (affinidi_get_option('ecommerce_sync_address_info') == "billing") {
+            set_wc_billing_address($customer, $userInfo, $contactInfo);
+        } else {
+            set_wc_billing_address($customer, $userInfo, $contactInfo);
+            set_wc_shipping_address($customer, $userInfo, $contactInfo);
+        }
+    }
+}
+
+
+function wp_users_can_signup() {
+    return is_multisite() ? users_can_register_signup_filter() : get_site_option( 'users_can_register' );
+}
+
+
+function filter_woocommerce_customer_login_form( $html ) {
+    // display affinidi login button
+	printf(get_wc_login_form_button(array()));
+}
+
+function filter_woocommerce_customer_regs_form( $html ) {
+    // display affinidi login button
+	printf(get_wc_regs_form_button(array()));
+}
+
+function filter_position_al_button_wc_myaccount_form() {
+
+    if (!is_woocommerce_activated()) {
+        return;
+    }
+
+    $options = array_shift(get_options(array('affinidi_options')));
+
+    $display_button_opt = $options['ecommerce_show_al_button'];
+
+    if ($display_button_opt == "") {
+        // do nothing
+        return;
+    }
+
+    $button_position = $display_button_opt == 'top_form' ? 'woocommerce_login_form_start' : 'woocommerce_login_form_end';
+
+    add_filter( $button_position, 'filter_woocommerce_customer_login_form' );
+}
+
+function filter_position_al_button_wc_reg_form() {
+
+    if (!is_woocommerce_activated()) {
+        return;
+    }
+
+    $options = array_shift(get_options(array('affinidi_options')));
+
+    $display_button_opt = $options['ecommerce_show_al_button'];
+
+    if ($display_button_opt == "") {
+        // do nothing
+        return;
+    }
+
+    $button_position = $display_button_opt == 'top_form' ? 'woocommerce_register_form_start' : 'woocommerce_register_form_end';
+
+    add_filter( $button_position, 'filter_woocommerce_customer_regs_form' );
+}
+
+/**
+ * Check if WooCommerce is activated
+ */
+if ( ! function_exists( 'is_woocommerce_activated' ) ) {
+	function is_woocommerce_activated() {
+		if ( class_exists( 'woocommerce' ) ) { return true; } else { return false; }
+	}
+}
+
+// filter display button for wc
+filter_position_al_button_wc_myaccount_form();
+filter_position_al_button_wc_reg_form();

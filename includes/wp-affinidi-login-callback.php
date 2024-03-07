@@ -16,25 +16,22 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Grab a copy of the options and set the redirect location.
-$user_redirect = affinidi_get_user_redirect_url();
-
-// Check for custom redirect
-if (!empty($_GET['redirect_uri'])) {
-    $user_redirect = esc_url($_GET['redirect_uri']);
-}
+// // Check for custom redirect
+// if (!empty($_GET['redirect_uri'])) {
+//     $user_redirect = esc_url($_GET['redirect_uri']);
+// }
 
 // Authenticate Check and Redirect
-if (!isset($_GET['code']) && !isset($_GET['error_description']) && !isset($_GET['state'])) {
+if (!isset($_GET['code']) && !isset($_GET['error_description'])) {
+
+    // Grab a copy of the options and set the redirect location.
+    $state = $_GET['state'];
 
     // generate code verifier and challenge
     $verifier_bytes = bin2hex(openssl_random_pseudo_bytes(32));
     $code_verifier = rtrim(strtr(base64_encode($verifier_bytes), "+/", "-_"), "=");
     $challenge_bytes = hash("sha256", $code_verifier, true);
     $code_challenge = rtrim(strtr(base64_encode($challenge_bytes), "+/", "-_"), "=");
-
-    // generate random state
-    $state = bin2hex(openssl_random_pseudo_bytes(9));
 
     // store the code verifier in the SESSION
     $_SESSION[$state] = $code_verifier;
@@ -54,13 +51,26 @@ if (!isset($_GET['code']) && !isset($_GET['error_description']) && !isset($_GET[
     exit;
 }
 
+// retrieve state and get the transient info for redirect
+$state      = sanitize_text_field($_GET['state']);
+$redirect_to = get_transient("affinidi_user_redirect_to".$state);
+// default to homepage if the state not found or expired
+$user_redirect = home_url();
+// check if the state exists
+if (!empty($redirect_to) && !empty($redirect_to[$state]) && !empty($redirect_to[$state]['redirect_to'])) {
+    // set the redirect url based on state
+    $user_redirect = $redirect_to[$state]['redirect_to'];
+    // delete the transient after
+    delete_transient("affinidi_user_redirect_to".$state);
+}
+
 // Check for error 
 if (empty($_GET['code']) && !empty($_GET['error_description'])) {
     // log error description on server side
     $log_message = "Affinidi Login: error={$_GET['error']}&error_description={$_GET['error_description']}".PHP_EOL;
     error_log($log_message);
     // redirect user with error code
-    wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed&error={$_GET['error']}");
+    wp_safe_redirect($user_redirect . "?message=affinidi_login_failed&error={$_GET['error']}");
     
     exit;
 }
@@ -72,7 +82,7 @@ if (!empty($_GET['code'])) {
     $backend    = affinidi_get_option('backend') . '/oauth2/token';
 
     // retrieve the code verifier from the SESSION
-    $code_verifier = $_SESSION[$_GET['state']];
+    $code_verifier = $_SESSION[$state];
 
     $request_body = [
         'grant_type'    => 'authorization_code',
@@ -93,7 +103,7 @@ if (!empty($_GET['code'])) {
         $error_message = $response->get_error_message();
         error_log($error_message);
         // redirect user with error code
-        wp_safe_redirect(wp_login_url() . "?message=wp_error_affinidi_login");
+        wp_safe_redirect($user_redirect . "?message=wp_error_affinidi_login");
         exit;
     }
 
@@ -104,57 +114,49 @@ if (!empty($_GET['code'])) {
         $log_message = "Affinidi Login: error={$tokens->error}&error_description={$tokens->error_description}".PHP_EOL;
         error_log($log_message);
         // redirect user with error code
-        wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed&error={$tokens->error}");
+        wp_safe_redirect($user_redirect . "?message=affinidi_login_failed&error={$tokens->error}");
         exit;
     }
 
     $access_token = $tokens->access_token;
     $id_token = $tokens->id_token;
     $info = json_decode(base64_decode(str_replace('_', '/', str_replace('-', '+', explode('.', $id_token)[1]))), true);
-    
-    $custom = $info['custom'];
 
-    $email = extractProp($custom, 'email');
-    $name = extractProp($custom, 'givenName');
-    $lastName = extractProp($custom, 'familyName');
-    $picture = extractProp($custom, 'picture');
-    $displayName = extractProp($custom, 'nickname');
+    // extract user info
+    $userInfo = extract_user_info($info);
+    // extract contact info
+    $contactInfo = extract_contact_info($info);
     
     $user_id = null;
 
-    if (email_exists($email) == false) {
-        if (affinidi_get_option('login_only') == 1) {
-            wp_safe_redirect(wp_login_url() . '?message=affinidi_login_only');
+    if (email_exists($userInfo['email']) == false) {
+        if (wp_users_can_signup() == 0) {
+            wp_safe_redirect(home_url() . '?message=affinidi_login_only');
             exit;
         }
 
         // Does not have an account... Register and then log the user in
         $random_password = wp_generate_password($length = 16, $extra_special_chars = true);
         $user_data = [
-            'user_email'   => $email,
-            'user_login'   => (!empty($name) ? $name : $email), // default to mail if not present
+            'user_email'   => $userInfo['email'],
+            'user_login'   => $userInfo['email'], // default to mail if not present
             'user_pass'    => $random_password,
-            'last_name'    => $lastName,
-            'first_name'    => $name,
-            'display_name' => (!empty($displayName) ? $displayName : $email) // default to mail if not present
+            'last_name'    => $userInfo['last_name'],
+            'first_name'    => $userInfo['first_name'],
+            'display_name' => (!empty($userInfo['display_name']) ? $userInfo['display_name'] : $userInfo['email']) // default to mail if not present
         ];
-        
-        /* TODO: Implement Admin User Group Scenario 
-        
-        if ($info->isGlobalAdmin) {
-            $user_data['role'] = 'administrator';
-        }
-        */
 
         $user_id = wp_insert_user($user_data);
 
+        // set Billing and Shipping Address from Vault
+        sync_address_info($user_id, $userInfo, $contactInfo, true);
         // Trigger new user created action so that there can be modifications to what happens after the user is created.
         // This can be used to collect other information about the user.
         do_action('affinidi_user_created', $info, 1);
 
     } else {
         // Already Registered... Log the User In using ID or Email
-        $user = get_user_by('email', $email);
+        $user = get_user_by('email', $userInfo['email']);
 
         /*
          * Added just in case the user is not used but the email may be. If the user returns false from the user ID,
@@ -162,14 +164,17 @@ if (!empty($_GET['code'])) {
          */
         if (!$user) {
              // Get the user by name
-            $user = get_user_by('login', $name);
+            $user = get_user_by('login', $userInfo['email']);
         }
+
+        $user_id = $user->ID;
+
+        // sync the address from Vault
+        sync_address_info($user_id, $userInfo, $contactInfo, false);
 
         // Trigger action when a user is logged in.
         // This will help allow extensions to be used without modifying the core plugin.
         do_action('affinidi_user_login', $info, 1);
-
-        $user_id = $user->ID;
     }
 
     // Did we retrieved or created the user successfully?
