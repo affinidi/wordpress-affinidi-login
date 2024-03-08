@@ -340,9 +340,11 @@ function sync_address_info($userId, $userInfo, $contactInfo, $isSignup) {
             set_wc_shipping_address($customer, $userInfo, $contactInfo);
         } else if (affinidi_get_option('ecommerce_sync_address_info') == "billing") {
             set_wc_billing_address($customer, $userInfo, $contactInfo);
-        } else {
+        } else if (affinidi_get_option('ecommerce_sync_address_info') == "billing_shipping") {
             set_wc_billing_address($customer, $userInfo, $contactInfo);
             set_wc_shipping_address($customer, $userInfo, $contactInfo);
+        } else {
+            // do nothing
         }
     }
 }

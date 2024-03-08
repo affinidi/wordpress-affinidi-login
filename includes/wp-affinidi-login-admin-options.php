@@ -59,7 +59,7 @@ class WP_Affinidi_Login_Admin
                 <p>
                     <strong>NOTE:</strong> If you want to add a
                     custom link anywhere in your theme, simply link to
-                    <code><?php echo esc_url(site_url('?auth=affinidi')); ?></code>
+                    <code><?php echo esc_url(site_url('?auth=affinidi')); ?></code> or use the shortcode <code>[affinidi_login]</code>
                     if the user is not logged in.
                 </p>
                 <div id="accordion">
@@ -80,7 +80,7 @@ class WP_Affinidi_Login_Admin
                             <li>Copy the <strong>Client ID</strong> and <strong>Issuer URL</strong> and paste it in Step 2 below.</li>
                             <li>
                                 <p>Modify the <strong>Presentation Definition</strong> and <strong>ID Token Mapping</strong> using <a href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/#presentation-definition-and-id-token-mapping" target="_blank">this template.</a></p>
-                                <p><em>If you have enabled support for E-Commerce, use the template for E-Commerce.</em></p>
+                                <p><em>If you have activated a supported E-Commerce plugin on this WordPress site, use the template for E-Commerce.</em></p>
                             </li>
                         </ol>
                     </div>
@@ -135,20 +135,32 @@ class WP_Affinidi_Login_Admin
                                 </tr>
                             </table>
                     </div>
+                    <hr />
                     <?php
-                    if (is_woocommerce_activated()) {
+
+                    $is_woocommerce_active = is_woocommerce_activated();
+                    
+                    if (!$is_woocommerce_active) {
+                    ?>
+                    <p class="description">There's no active supported e-commerce plugin configured on this WordPress site. E-Commerce Settings is disabled. To learn more about the supported e-commerce plugins, <a href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/#supported-e-commerce-plugins" target="_blank">click here.</a></p>
+                    <?php
+                    }
+
+                    if ($is_woocommerce_active) {
                     ?>
                     <h3 id="sso-configuration">WooCommerce Settings</h3>
                     <div class="row">
                         <table class="form-table">
                             <tr valign="top">
-                                <th scope="row">Sync address info on login</th>
+                                <th scope="row">Sync customer profile from Vault</th>
                                 <td>
                                     <select name="<?php echo esc_html(self::OPTIONS_NAME); ?>[ecommerce_sync_address_info]">
-                                        <option value="billing" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "billing" ); ?>>Billing Address Info</option>
-                                        <option value="billing_shipping" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "billing_shipping" ); ?>>Billing and Shipping Address Info</option>
+                                        <option value="onlysignup" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "onlysignup" ); ?>>Only on sign up</option>
+                                        <option value="billing" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "billing" ); ?>>Always sync Billing info</option>
+                                        <option value="billing_shipping" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "billing_shipping" ); ?>>Always sync Billing and Shipping info</option>
                                     </select>
-                                    <p class="description">Affinidi Login will always populate both Billing and Shipping Address info on Signup.</p>
+                                    <p class="description">Select whether to sync the user profile from Vault whenever the user logs in to their WooCommerce account or only sync their profile on sign-up. Sign-up will populate the customer's billing and shipping address info.</p>
+                                    <p class="description">Remember to modify the <strong>Presentation Definition</strong> and <strong>ID Token Mapping</strong> using the <a href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/#presentation-definition-and-id-token-mapping" target="_blank">E-Commerce template</a> to request the user's profile from Affinidi Vault.</p>
                                 </td>
                             </tr>
 
@@ -156,11 +168,11 @@ class WP_Affinidi_Login_Admin
                                 <th scope="row">Display Affinidi Login button</th>
                                 <td>
                                     <select name="<?php echo esc_html(self::OPTIONS_NAME); ?>[ecommerce_show_al_button]">
-                                        <option value="top_form" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "top_form" ); ?>>At the top of the Login Form</option>
-                                        <option value="bottom_form" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "bottom_form" ); ?>>At the bottom of the Login Form</option>
-                                        <option value="" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "" ); ?>>Don't display on Login Form</option>
+                                        <option value="top_form" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "top_form" ); ?>>At the top of the Login & Registration Form</option>
+                                        <option value="bottom_form" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "bottom_form" ); ?>>At the bottom of the Login & Registration Form</option>
+                                        <option value="" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "" ); ?>>Use shortcode to display the button</option>
                                     </select>
-                                    <p class="description">If you choose <em>"Don't display on Login Form"</em>, use the shortcode <strong>[affinidi_login]</strong> to display the button on your desired page.</p>
+                                    <p class="description">If you choose <em>"Use shortcode to display the button"</em>, use the shortcode <code>[affinidi_login]</code> and manually edit your desired page to display the button.</p>
                                 </td>
                             </tr>
 
@@ -169,7 +181,7 @@ class WP_Affinidi_Login_Admin
                                 <td>
                                     <input type="text" class="regular-text" name="<?php echo esc_html(self::OPTIONS_NAME); ?>[affinidi_login_loginform_header]" min="10"
                                         value="<?php echo esc_html(affinidi_get_option('affinidi_login_loginform_header') ? affinidi_get_option('affinidi_login_loginform_header') : "Log in passwordless with"); ?>"/>
-                                    <p class="description"></p>
+                                    <p class="description">Displays at the top of the Affinidi Login button in the Login Form of WooCommerce.</p>
                                 </td>
                             </tr>
 
@@ -178,7 +190,7 @@ class WP_Affinidi_Login_Admin
                                 <td>
                                     <input type="text" class="regular-text" name="<?php echo esc_html(self::OPTIONS_NAME); ?>[affinidi_login_regform_header]" min="10"
                                         value="<?php echo esc_html(affinidi_get_option('affinidi_login_regform_header') ? affinidi_get_option('affinidi_login_regform_header') : "Sign up seamlessly with"); ?>"/>
-                                    <p class="description"></p>
+                                        <p class="description">Displays at the top of the Affinidi Login button in the Registration Form of WooCommerce.</p>
                                 </td>
                             </tr>
                         </table>
