@@ -47,7 +47,7 @@ class WP_Affinidi_Login_Admin
     public function options_do_page()
     {
         ?>
-        <div class="affinidi-login-settings">
+        <div class="affinidi-login-settings container-fluid">
             <div class="admin-settings-header">
                 <h1>Affinidi Login</h1>
                 <a class="affinidi-login-doc" href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/" target="_blank">
@@ -58,8 +58,8 @@ class WP_Affinidi_Login_Admin
                 <p>This plugin is meant to be used with <a href="https://www.affinidi.com/product/affinidi-login" target="_blank">Affinidi Login</a> and uses <a href="https://oauth.net/2/pkce/" target="_blank">PKCE</a> extension of OAuth 2.0 standard.</p>
                 <p>
                     <strong>NOTE:</strong> If you want to add a
-                    custom link anywhere in your theme simply link to
-                    <strong><?php echo esc_url(site_url('?auth=affinidi')); ?></strong>
+                    custom link anywhere in your theme, simply link to
+                    <code><?php echo esc_url(site_url('?auth=affinidi')); ?></code> or use the shortcode <code>[affinidi_login]</code>
                     if the user is not logged in.
                 </p>
                 <div id="accordion">
@@ -77,23 +77,18 @@ class WP_Affinidi_Login_Admin
                                 <p>
                                 <strong>Auth method:</strong> <code>None</code></p>
                             </li>
-                            <li>Copy and paste the Client ID and Issuer URL in Step 2 below.</li>
+                            <li>Copy the <strong>Client ID</strong> and <strong>Issuer URL</strong> and paste it in Step 2 below.</li>
+                            <li>
+                                <p>Modify the <strong>Presentation Definition</strong> and <strong>ID Token Mapping</strong> using <a href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/#presentation-definition-and-id-token-mapping" target="_blank">this template.</a></p>
+                                <p><em>If you have activated a supported E-Commerce plugin on this WordPress site, use the template for E-Commerce.</em></p>
+                            </li>
                         </ol>
                     </div>
                     <h3 id="sso-configuration">Step 2: Configure</h3>
-                    <div>
+                    <div class="row">
                         <form method="post" action="options.php">
                             <?php settings_fields('affinidi_options'); ?>
                             <table class="form-table">
-                            <tr valign="top">
-                                    <th scope="row">Activate Affinidi Login</th>
-                                    <td>
-                                        <input type="checkbox"
-                                            name="<?php echo  esc_html(self::OPTIONS_NAME); ?>[active]"
-                                            value="1" <?php echo affinidi_get_option('active') == 1 ? 'checked="checked"' : ''; ?> />
-                                    </td>
-                                </tr>
-
                                 <tr valign="top">
                                     <th scope="row">Client ID</th>
                                     <td>
@@ -107,32 +102,105 @@ class WP_Affinidi_Login_Admin
                                     <td>
                                         <input type="text" class="regular-text" name="<?php echo esc_html(self::OPTIONS_NAME); ?>[backend]" min="10"
                                             value="<?php echo esc_html(affinidi_get_option('backend')); ?>"/>
-                                        <p class="description">Example: https://[YOUR_PROJECT_ID]].apse1.login.affinidi.io</p>
+                                        <p class="description">Example: https://[YOUR_PROJECT_ID].apse1.login.affinidi.io</p>
                                     </td>
                                 </tr>
 
                                 <tr valign="top">
-                                    <th scope="row">Redirect to the dashboard after signing in</th>
+                                    <th scope="row">Redirect user to Origin Page</th>
                                     <td>
                                         <input type="checkbox"
-                                            name="<?php echo esc_html(self::OPTIONS_NAME); ?>[redirect_to_dashboard]"
-                                            value="1" <?php echo affinidi_get_option('redirect_to_dashboard') == 1 ? 'checked="checked"' : ''; ?> />
+                                            name="<?php echo esc_html(self::OPTIONS_NAME); ?>[redirect_user_origin]"
+                                            value="1" <?php echo affinidi_get_option('redirect_user_origin') == 1 ? 'checked="checked"' : ''; ?> />
+                                        <p class="description">By default, users will be redirected to Homepage. If the user used the <em>wp-login.php</em> form, they will be redirected to Dashboard.</p>
                                     </td>
                                 </tr>
                                 <tr valign="top">
                                     <th scope="row">Restrict flow to log in only (new users will not be allowed to signup)</th>
                                     <td>
-                                        <input type="checkbox"
-                                            name="<?php echo esc_html(self::OPTIONS_NAME) ?>[login_only]"
-                                            value="1" <?php echo affinidi_get_option('login_only') == 1 ? 'checked="checked"' : ''; ?> />
+                                        <?php
+                                        if (wp_users_can_signup()) {
+                                        ?>
+                                        <p class="description">Signup is currently <strong>enabled</strong> in the WordPress General Settings.</p>
+                                        <p class="description"> Update the WordPress settings if you wish to restrict users from signing up using their Vault.</p>
+                                        <?php
+                                        } else {
+                                        ?>
+                                        <p class="description">Sign up is currently <strong>disabled</strong> in the WordPress General Settings.</p>
+                                        <p  class="description">Update the WordPress settings if you wish to allow users to signup using their Vault.</p>
+                                        <?php
+                                        }
+                                        ?>
                                     </td>
                                 </tr>
                             </table>
-                            <p class="submit">
-                                <input type="submit" class="button-primary" value="<?php esc_html_e('Save Changes') ?>"/>
-                            </p>
                     </div>
+                    <hr />
+                    <?php
 
+                    $is_woocommerce_active = is_woocommerce_activated();
+                    
+                    if (!$is_woocommerce_active) {
+                    ?>
+                    <p class="description">There's no active supported e-commerce plugin configured on this WordPress site. E-Commerce Settings is disabled. To learn more about the supported e-commerce plugins, <a href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/#supported-e-commerce-plugins" target="_blank">click here.</a></p>
+                    <?php
+                    }
+
+                    if ($is_woocommerce_active) {
+                    ?>
+                    <h3 id="sso-configuration">WooCommerce Settings</h3>
+                    <div class="row">
+                        <table class="form-table">
+                            <tr valign="top">
+                                <th scope="row">Sync customer profile from Vault</th>
+                                <td>
+                                    <select name="<?php echo esc_html(self::OPTIONS_NAME); ?>[ecommerce_sync_address_info]">
+                                        <option value="onlysignup" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "onlysignup" ); ?>>Only on sign up</option>
+                                        <option value="billing" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "billing" ); ?>>Always sync Billing info</option>
+                                        <option value="billing_shipping" <?php selected( affinidi_get_option('ecommerce_sync_address_info'), "billing_shipping" ); ?>>Always sync Billing and Shipping info</option>
+                                    </select>
+                                    <p class="description">Select whether to sync the user profile from Vault whenever the user logs in to their WooCommerce account or only sync their profile on sign-up. Sign-up will populate the customer's billing and shipping address info.</p>
+                                    <p class="description">Remember to modify the <strong>Presentation Definition</strong> and <strong>ID Token Mapping</strong> using the <a href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/#presentation-definition-and-id-token-mapping" target="_blank">E-Commerce template</a> to request the user's profile from Affinidi Vault.</p>
+                                </td>
+                            </tr>
+
+                            <tr valign="top">
+                                <th scope="row">Display Affinidi Login button</th>
+                                <td>
+                                    <select name="<?php echo esc_html(self::OPTIONS_NAME); ?>[ecommerce_show_al_button]">
+                                        <option value="top_form" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "top_form" ); ?>>At the top of the Login & Registration Form</option>
+                                        <option value="bottom_form" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "bottom_form" ); ?>>At the bottom of the Login & Registration Form</option>
+                                        <option value="" <?php selected( affinidi_get_option('ecommerce_show_al_button'), "" ); ?>>Use shortcode to display the button</option>
+                                    </select>
+                                    <p class="description">If you choose <em>"Use shortcode to display the button"</em>, use the shortcode <code>[affinidi_login]</code> and manually edit your desired page to display the button.</p>
+                                </td>
+                            </tr>
+
+                            <tr valign="top">
+                                <th scope="row">Affinidi Login button header (Login Form)</th>
+                                <td>
+                                    <input type="text" class="regular-text" name="<?php echo esc_html(self::OPTIONS_NAME); ?>[affinidi_login_loginform_header]" min="10"
+                                        value="<?php echo esc_html(affinidi_get_option('affinidi_login_loginform_header') ? affinidi_get_option('affinidi_login_loginform_header') : "Log in passwordless with"); ?>"/>
+                                    <p class="description">Displays at the top of the Affinidi Login button in the Login Form of WooCommerce.</p>
+                                </td>
+                            </tr>
+
+                            <tr valign="top">
+                                <th scope="row">Affinidi Login button header (Registration Form)</th>
+                                <td>
+                                    <input type="text" class="regular-text" name="<?php echo esc_html(self::OPTIONS_NAME); ?>[affinidi_login_regform_header]" min="10"
+                                        value="<?php echo esc_html(affinidi_get_option('affinidi_login_regform_header') ? affinidi_get_option('affinidi_login_regform_header') : "Sign up seamlessly with"); ?>"/>
+                                        <p class="description">Displays at the top of the Affinidi Login button in the Registration Form of WooCommerce.</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <?php
+                    }
+                    ?>
+                    <p class="submit">
+                        <input type="submit" class="button-primary" value="<?php esc_html_e('Save Changes') ?>"/>
+                    </p>
                     </form>
                 </div>
             </div>
@@ -150,9 +218,10 @@ class WP_Affinidi_Login_Admin
      */
     public function validate(array $input): array
     {
-        $input['redirect_to_dashboard'] = isset($input['redirect_to_dashboard']) ? $input['redirect_to_dashboard'] : 0;
-        $input['login_only']            = isset($input['login_only']) ? $input['login_only'] : 0;
-        $input['organization']          = isset($input['organization']) ? $input['organization'] : 'built-in';
+        $input['redirect_user_origin'] = isset($input['redirect_user_origin']) ? $input['redirect_user_origin'] : 0;
+        $input['enable_ecommerce_support'] = isset($input['enable_ecommerce_support']) ? $input['enable_ecommerce_support'] : '';
+        $input['affinidi_login_loginform_header'] = isset($input['affinidi_login_loginform_header']) ? $input['affinidi_login_loginform_header'] : 'Log in passwordless with';
+        $input['affinidi_login_regform_header'] = isset($input['affinidi_login_regform_header']) ? $input['affinidi_login_regform_header'] : 'Sign up seamlessly with';
 
         return $input;
     }

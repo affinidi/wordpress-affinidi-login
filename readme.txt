@@ -1,10 +1,10 @@
 === Affinidi Login - Passwordless Authentication ===
 Contributors: affinidi
-Tags: authentication, security, multi-factor, oauth2, sso
+Tags: authentication, passwordless, multi-factor, sso, ecommerce
 Requires at least: 6.4
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: MIT
 License URI: https://github.com/affinidi/wordpress-affinidi-login/blob/main/LICENSE
 
@@ -25,6 +25,12 @@ Leverages OID4VP to enable users to control their data and digital identity, sel
 = Uses Latest Standards =
 
 Utilises OID4VP to enhance security of the authentication process by verifying user authenticity without the need for direct communication with the provider, reducing risk of tampering and ensuring data integrity.
+
+= Features =
+
+- Passwordless login experience for users using Affinidi Login and Affinidi Vault.
+
+- Supports WooCommerce: Passwordless login, Seamless Customer Onboarding, and Customer profile creation.
 
 = Shortcode =
 
@@ -83,6 +89,4 @@ We are here to help. Please [Contact Us](https://www.affinidi.com/get-in-touch) 
 
 == Changelog ==
 
-= 1.0.0 =
-
-* Initial release of Affinidi Login - Passwordless Authentication for Wordpress.
+Visit our [GitHub Releases](https://github.com/affinidi/wordpress-affinidi-login/releases) for the complete list of changes and releases.

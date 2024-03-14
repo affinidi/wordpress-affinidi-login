@@ -13,14 +13,14 @@ class Affinidi
     public static $_instance = null;
 
     protected $default_settings = [
-        'active'               => 0,
         'client_id'            => '',
         'backend'              => '',
-        'organization'         => '',
-        'server_oauth_trigger' => 'oauth',
-        'server_auth_endpoint' => 'auth',
-        'server_token_endpont' => 'token',
-        'server_user_endpoint' => 'userinfo'
+        'redirect_user_origin' => 0,
+        'enable_ecommerce_support' => '',
+        'ecommerce_sync_address_info' => 'billing',
+        'ecommerce_show_al_button' => 'top_form',
+        'affinidi_login_loginform_header' => 'Log in passwordless with',
+        'affinidi_login_regform_header' => 'Sign up seamlessly with',
     ];
 
     public function __construct()
