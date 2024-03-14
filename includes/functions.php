@@ -167,7 +167,7 @@ function affinidi_login_button_shortcode($atts = array())
 
     $redirect_to = affinidi_get_user_redirect_url();
 
-    return '<a id="affinidi-login-m" rel="nofollow" class="' . $a['class'] . '" href="' . site_url('?auth=affinidi&state='.$redirect_to) . '" title="' . $a['title'] . '" target="' . $a['target'] . '">' . $a['text'] . '</a>';
+    return '<a id="affinidi-login-m" rel="nofollow" class="' . esc_attr($a['class']) . '" href="' . esc_url(site_url('?auth=affinidi&state='.$redirect_to)) . '" title="' . esc_attr($a['title']) . '" target="' . esc_attr($a['target']) . '">' . esc_html($a['text']) . '</a>';
 }
 
 add_shortcode('affinidi_login', 'affinidi_login_button_shortcode');
@@ -179,7 +179,7 @@ function get_wc_login_form_button($atts = array()) {
     $display_button_header = $options['affinidi_login_loginform_header'];
 
     return '
-        <div class="form-affinidi-login"><div><p class="form-affinidi-login-header">' . $display_button_header . '</p></div><div>' . affinidi_login_button_shortcode($atts) . '</div></div>';
+        <div class="form-affinidi-login"><div><p class="form-affinidi-login-header">' . esc_html($display_button_header) . '</p></div><div>' . affinidi_login_button_shortcode($atts) . '</div></div>';
 }
 
 function get_wc_regs_form_button($atts = array()) {
@@ -189,7 +189,7 @@ function get_wc_regs_form_button($atts = array()) {
     $display_button_header = $options['affinidi_login_regform_header'];
 
     return '
-        <div class="form-affinidi-login"><div><p class="form-affinidi-login-header">' . $display_button_header . '</p></div><div>' . affinidi_login_button_shortcode($atts) . '</div></div>';
+        <div class="form-affinidi-login"><div><p class="form-affinidi-login-header">' . esc_html($display_button_header) . '</p></div><div>' . affinidi_login_button_shortcode($atts) . '</div></div>';
 }
 
 /**
@@ -357,12 +357,18 @@ function wp_users_can_signup() {
 
 function filter_woocommerce_customer_login_form( $html ) {
     // display affinidi login button
-	printf(get_wc_login_form_button(array()));
+    // HTML attr and text already escaped
+    // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+	return printf(get_wc_login_form_button(array()));
+	// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 function filter_woocommerce_customer_regs_form( $html ) {
     // display affinidi login button
-	printf(get_wc_regs_form_button(array()));
+    // HTML attr and text already escaped
+    // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+	return printf(get_wc_regs_form_button(array()));
+    // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 function filter_position_al_button_wc_myaccount_form() {
