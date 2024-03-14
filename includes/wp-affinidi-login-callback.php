@@ -16,16 +16,24 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// // Check for custom redirect
-// if (!empty($_GET['redirect_uri'])) {
-//     $user_redirect = esc_url($_GET['redirect_uri']);
-// }
+// default to homepage if the state not found or expired
+$user_redirect = home_url();
+
+// Check for error, ensure state has value
+if (empty($_GET['state'])) {
+    // log error description on server side
+    $log_message = "Affinidi Login: state is empty".PHP_EOL;
+    error_log($log_message);
+    // redirect user with error code
+    wp_safe_redirect($user_redirect . "?message=affinidi_login_failed");
+    exit;
+}
 
 // Authenticate Check and Redirect
-if (!isset($_GET['code']) && !isset($_GET['error_description']) && !empty($_GET['state'])) {
+if (!isset($_GET['code']) && !isset($_GET['error_description'])) {
 
     // Grab the state from the Auth URL and send to AL
-    $state = $_GET['state'];
+    $state = sanitize_text_field($_GET['state']);
 
     // generate code verifier and challenge
     $verifier_bytes = bin2hex(openssl_random_pseudo_bytes(32));
@@ -51,21 +59,9 @@ if (!isset($_GET['code']) && !isset($_GET['error_description']) && !empty($_GET[
     exit;
 }
 
-// Check for error 
-if (empty($_GET['state'])) {
-    // log error description on server side
-    $log_message = "Affinidi Login: State is empty".PHP_EOL;
-    error_log($log_message);
-    // redirect user with error code
-    wp_safe_redirect($user_redirect . "?message=affinidi_login_failed");
-    exit;
-}
-
 // retrieve state and get the transient info for redirect
 $state      = sanitize_text_field($_GET['state']);
 $redirect_to = get_transient("affinidi_user_redirect_to".$state);
-// default to homepage if the state not found or expired
-$user_redirect = home_url();
 // check if the state exists
 if (!empty($redirect_to) && !empty($redirect_to[$state]) && !empty($redirect_to[$state]['redirect_to'])) {
     // set the redirect url based on state
@@ -81,7 +77,6 @@ if (empty($_GET['code']) && !empty($_GET['error_description'])) {
     error_log($log_message);
     // redirect user with error code
     wp_safe_redirect($user_redirect . "?message=affinidi_login_failed&error={$_GET['error']}");
-    
     exit;
 }
 
