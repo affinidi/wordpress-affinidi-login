@@ -22,9 +22,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // }
 
 // Authenticate Check and Redirect
-if (!isset($_GET['code']) && !isset($_GET['error_description'])) {
+if (!isset($_GET['code']) && !isset($_GET['error_description']) && !empty($_GET['state'])) {
 
-    // Grab a copy of the options and set the redirect location.
+    // Grab the state from the Auth URL and send to AL
     $state = $_GET['state'];
 
     // generate code verifier and challenge
@@ -48,6 +48,16 @@ if (!isset($_GET['code']) && !isset($_GET['error_description'])) {
     ];
     $params = http_build_query($params);
     wp_redirect(affinidi_get_option('backend') . '/oauth2/auth?' . $params);
+    exit;
+}
+
+// Check for error 
+if (empty($_GET['state'])) {
+    // log error description on server side
+    $log_message = "Affinidi Login: State is empty".PHP_EOL;
+    error_log($log_message);
+    // redirect user with error code
+    wp_safe_redirect($user_redirect . "?message=affinidi_login_failed");
     exit;
 }
 
