@@ -234,7 +234,7 @@ function affinidi_get_user_redirect_url(): string
     }
 
     // generate random state
-    $state = md5( mt_rand() . microtime( true ) );
+    $state = md5( wp_rand() . microtime( true ) );
     // store redirect_to transient info to options
     $affinidi_state_values = array(
         $state => array(
