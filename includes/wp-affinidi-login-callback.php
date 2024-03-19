@@ -16,12 +16,17 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$admin_options = new Affinidi_Login_Admin_Options();
+
 // Grab a copy of the options and set the redirect location.
-$user_redirect = affinidi_get_user_redirect_url();
+$user_redirect = affinidi_login_user_redirect_url();
+
+// Not processing form or storing data.
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
 
 // Check for custom redirect
 if (!empty($_GET['redirect_uri'])) {
-    $user_redirect = esc_url($_GET['redirect_uri']);
+    $user_redirect = sanitize_url($_GET['redirect_uri']);
 }
 
 // Authenticate Check and Redirect
@@ -43,41 +48,48 @@ if (!isset($_GET['code']) && !isset($_GET['error_description']) && !isset($_GET[
         'oauth'                 => 'authorize',
         'response_type'         => 'code',
         'scope'                 => 'openid',
-        'client_id'             => affinidi_get_option('client_id'),
+        'client_id'             => $admin_options->client_id,
         'redirect_uri'          => site_url('?auth=affinidi'),
         'state'                 => urlencode($state),
         'code_challenge'        => $code_challenge,
         'code_challenge_method' => 'S256',
     ];
     $params = http_build_query($params);
-    wp_redirect(affinidi_get_option('backend') . '/oauth2/auth?' . $params);
+    wp_redirect($admin_options->backend . '/oauth2/auth?' . $params);
     exit;
 }
 
 // Check for error 
 if (empty($_GET['code']) && !empty($_GET['error_description'])) {
+    // set error desc
+    $error_desc = sanitize_text_field($_GET['error_description']);
     // log error description on server side
-    $log_message = "Affinidi Login: error={$_GET['error']}&error_description={$_GET['error_description']}".PHP_EOL;
-    error_log($log_message);
+    $log_message = "Affinidi Login: {$error_desc}".PHP_EOL;
+    affinidi_login_write_log($log_message);
     // redirect user with error code
-    wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed&error={$_GET['error']}");
+    wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
     
     exit;
 }
 
-// Handle the callback from the backend is there is one.
-if (!empty($_GET['code'])) {
+// grab the code and state
+$auth_code = sanitize_text_field($_GET['code']);
+$state = sanitize_text_field($_GET['state']);
 
-    $code       = sanitize_text_field($_GET['code']);
-    $backend    = affinidi_get_option('backend') . '/oauth2/token';
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+// Handle the callback from the backend is there is one.
+if (!empty($auth_code)) {
+
+    $backend    = $admin_options->backend . '/oauth2/token';
 
     // retrieve the code verifier from the SESSION
-    $code_verifier = $_SESSION[$_GET['state']];
+    $code_verifier = $_SESSION[$state];
 
     $request_body = [
         'grant_type'    => 'authorization_code',
-        'code'          => $code,
-        'client_id'     => affinidi_get_option('client_id'),
+        'code'          => $auth_code,
+        'client_id'     => $admin_options->client_id,
         'code_verifier' => $code_verifier,
         'redirect_uri'  => site_url('?auth=affinidi')
     ];
@@ -91,7 +103,7 @@ if (!empty($_GET['code'])) {
     if (is_wp_error($response)) {
         // log error description
         $error_message = $response->get_error_message();
-        error_log($error_message);
+        affinidi_login_write_log($error_message);
         // redirect user with error code
         wp_safe_redirect(wp_login_url() . "?message=wp_error_affinidi_login");
         exit;
@@ -102,9 +114,9 @@ if (!empty($_GET['code'])) {
     if (isset($tokens->error)) {
         // log error description on server side
         $log_message = "Affinidi Login: error={$tokens->error}&error_description={$tokens->error_description}".PHP_EOL;
-        error_log($log_message);
+        affinidi_login_write_log($log_message);
         // redirect user with error code
-        wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed&error={$tokens->error}");
+        wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
         exit;
     }
 
@@ -114,16 +126,16 @@ if (!empty($_GET['code'])) {
     
     $custom = $info['custom'];
 
-    $email = extractProp($custom, 'email');
-    $name = extractProp($custom, 'givenName');
-    $lastName = extractProp($custom, 'familyName');
-    $picture = extractProp($custom, 'picture');
-    $displayName = extractProp($custom, 'nickname');
+    $email = sanitize_user(affinidi_login_extract_prop($custom, 'email'));
+    $name = sanitize_text_field(affinidi_login_extract_prop($custom, 'givenName'));
+    $lastName = sanitize_text_field(affinidi_login_extract_prop($custom, 'familyName'));
+    $picture = sanitize_text_field(affinidi_login_extract_prop($custom, 'picture'));
+    $displayName = sanitize_text_field(affinidi_login_extract_prop($custom, 'nickname'));
     
     $user_id = null;
 
     if (email_exists($email) == false) {
-        if (affinidi_get_option('login_only') == 1) {
+        if ($admin_options->login_only == 1) {
             wp_safe_redirect(wp_login_url() . '?message=affinidi_login_only');
             exit;
         }
@@ -138,13 +150,6 @@ if (!empty($_GET['code'])) {
             'first_name'    => $name,
             'display_name' => (!empty($displayName) ? $displayName : $email) // default to mail if not present
         ];
-        
-        /* TODO: Implement Admin User Group Scenario 
-        
-        if ($info->isGlobalAdmin) {
-            $user_data['role'] = 'administrator';
-        }
-        */
 
         $user_id = wp_insert_user($user_data);
 

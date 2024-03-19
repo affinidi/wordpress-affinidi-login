@@ -7,8 +7,16 @@ defined('ABSPATH') or die('No script kiddies please!');
  * Class Rewrites
  *
  */
-class WP_Affinidi_Login_Rewrites
+class Affinidi_Login_Rewrites
 {
+
+    private $admin_options;
+
+    public function __construct(Affinidi_Login_Admin_Options $admin_options)
+    {
+        $this->admin_options = new Affinidi_Login_Admin_Options();
+    }
+
     public function create_rewrite_rules($rules): array
     {
         global $wp_rewrite;
@@ -34,13 +42,12 @@ class WP_Affinidi_Login_Rewrites
 
     public function template_redirect_intercept(): void
     {
-        $activated = absint(affinidi_get_option('active'));
+        $activated = absint($this->admin_options->active);
         if (!$activated) {
             return;
         }
         global $wp_query;
         $auth = $wp_query->get('auth');
-        $options = get_option('affinidi_options');
 
         if ($auth !== '') {
             // affinidi will add another ? to the uri, this will make the value of auth like this : affinidi?code=c9550137370a99bc2137
@@ -69,7 +76,9 @@ class WP_Affinidi_Login_Rewrites
     }
 }
 
-$rewrites = new WP_Affinidi_Login_Rewrites();
+$admin_options = new Affinidi_Login_Admin_Options();
+$rewrites = new Affinidi_Login_Rewrites($admin_options);
+
 add_filter('rewrite_rules_array', [$rewrites, 'create_rewrite_rules']);
 add_filter('query_vars', [$rewrites, 'add_query_vars']);
 add_filter('wp_loaded', [$rewrites, 'flush_rewrite_rules']);
