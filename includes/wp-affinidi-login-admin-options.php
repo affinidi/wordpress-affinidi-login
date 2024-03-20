@@ -1,5 +1,8 @@
 <?php
 
+// ABSPATH prevent public user to directly access your .php files through URL.
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Affinidi_Login_Admin_Options {
 
     const OPTION_NAME = 'affinidi_options';
