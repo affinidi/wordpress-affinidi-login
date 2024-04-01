@@ -13,8 +13,16 @@ if ($message == 'affinidi_login_only') {
     $alert_message = 'For security reasons, this user can not use Single Sign On.';
 }
 
-if (!empty($alert_message)) : ?>
-    <div class="error">
-        <p class="alertbar"><?php esc_html($alert_message) . ' <a href="' . esc_url(site_url('?auth=affinidi')) . '">Please try again</a>'?></p>
-    </div>
-<?php endif; ?>
+if (!empty($alert_message)) {
+    // display error message
+    $alert_message_html = sprintf(
+        '<div class="error">
+            <p class="alertbar">%s <a href="%s">Please try again</a></p>
+        </div>',
+        esc_html($alert_message),
+        esc_url(site_url('?auth=affinidi')),
+
+    );
+
+    echo wp_kses_post($alert_message_html);
+}

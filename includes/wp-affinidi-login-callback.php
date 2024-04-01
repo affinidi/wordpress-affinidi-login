@@ -55,16 +55,16 @@ if (!isset($_GET['code']) && !isset($_GET['error_description']) && !isset($_GET[
         'code_challenge_method' => 'S256',
     ];
     $params = http_build_query($params);
-    wp_redirect($admin_options->backend . '/oauth2/auth?' . $params);
+    wp_redirect(sanitize_url($admin_options->backend) . '/oauth2/auth?' . $params);
     exit;
 }
 
 // Check for error 
 if (empty($_GET['code']) && !empty($_GET['error_description'])) {
     // set error desc
-    $error_desc = sanitize_text_field($_GET['error_description']);
-    // log error description on server side
-    $log_message = "Affinidi Login: {$error_desc}".PHP_EOL;
+    $log_message = sprintf("Affinidi Login: %s",
+        sanitize_text_field($_GET['error_description'])
+    );
     affinidi_login_write_log($log_message);
     // redirect user with error code
     wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
@@ -81,10 +81,10 @@ $state = sanitize_text_field($_GET['state']);
 // Handle the callback from the backend is there is one.
 if (!empty($auth_code)) {
 
-    $backend    = $admin_options->backend . '/oauth2/token';
+    $backend    = sanitize_url($admin_options->backend) . '/oauth2/token';
 
     // retrieve the code verifier from the SESSION
-    $code_verifier = $_SESSION[$state];
+    $code_verifier = sanitize_text_field($_SESSION[$state]);
 
     $request_body = [
         'grant_type'    => 'authorization_code',
@@ -102,7 +102,7 @@ if (!empty($auth_code)) {
 
     if (is_wp_error($response)) {
         // log error description
-        $error_message = $response->get_error_message();
+        $error_message = sanitize_text_field($response->get_error_message());
         affinidi_login_write_log($error_message);
         // redirect user with error code
         wp_safe_redirect(wp_login_url() . "?message=wp_error_affinidi_login");
@@ -113,28 +113,25 @@ if (!empty($auth_code)) {
 
     if (isset($tokens->error)) {
         // log error description on server side
-        $log_message = "Affinidi Login: error={$tokens->error}&error_description={$tokens->error_description}".PHP_EOL;
+        $log_message = sprintf("Affinidi Login: error=%s&error_description=%s",
+            sanitize_text_field($tokens->error),
+            sanitize_text_field($tokens->error_description)
+        );
         affinidi_login_write_log($log_message);
         // redirect user with error code
         wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
         exit;
     }
-
-    $access_token = $tokens->access_token;
+    // parse ID Token from Affinidi Login response
     $id_token = $tokens->id_token;
     $info = json_decode(base64_decode(str_replace('_', '/', str_replace('-', '+', explode('.', $id_token)[1]))), true);
-    
-    $custom = $info['custom'];
 
-    $email = sanitize_user(affinidi_login_extract_prop($custom, 'email'));
-    $name = sanitize_text_field(affinidi_login_extract_prop($custom, 'givenName'));
-    $lastName = sanitize_text_field(affinidi_login_extract_prop($custom, 'familyName'));
-    $picture = sanitize_text_field(affinidi_login_extract_prop($custom, 'picture'));
-    $displayName = sanitize_text_field(affinidi_login_extract_prop($custom, 'nickname'));
+    // extract and sanitize user info from ID Token
+    $user_info = affinidi_login_extract_prop($info);
     
     $user_id = null;
 
-    if (email_exists($email) == false) {
+    if (email_exists($user_info['email']) == false) {
         if ($admin_options->login_only == 1) {
             wp_safe_redirect(wp_login_url() . '?message=affinidi_login_only');
             exit;
@@ -143,12 +140,12 @@ if (!empty($auth_code)) {
         // Does not have an account... Register and then log the user in
         $random_password = wp_generate_password($length = 16, $extra_special_chars = true);
         $user_data = [
-            'user_email'   => $email,
-            'user_login'   => (!empty($name) ? $name : $email), // default to mail if not present
+            'user_email'   => $user_info['email'],
+            'user_login'   => (!empty($user_info['given_name']) ? $user_info['given_name'] : $user_info['email']), // default to mail if not present
             'user_pass'    => $random_password,
-            'last_name'    => $lastName,
-            'first_name'    => $name,
-            'display_name' => (!empty($displayName) ? $displayName : $email) // default to mail if not present
+            'last_name'    => $user_info['family_name'],
+            'first_name'    => $user_info['given_name'],
+            'display_name' => (!empty($user_info['given_name']) ? $user_info['given_name'] : $user_info['email']) // default to mail if not present
         ];
 
         $user_id = wp_insert_user($user_data);
@@ -159,7 +156,7 @@ if (!empty($auth_code)) {
 
     } else {
         // Already Registered... Log the User In using ID or Email
-        $user = get_user_by('email', $email);
+        $user = get_user_by('email', $user_info['email']);
 
         /*
          * Added just in case the user is not used but the email may be. If the user returns false from the user ID,
@@ -167,7 +164,7 @@ if (!empty($auth_code)) {
          */
         if (!$user) {
              // Get the user by name
-            $user = get_user_by('login', $name);
+            $user = get_user_by('login', $user_info['given_name']);
         }
 
         // Trigger action when a user is logged in.
@@ -178,7 +175,7 @@ if (!empty($auth_code)) {
     }
 
     // Did we retrieved or created the user successfully?
-    if ($user_id) {
+    if (!empty($user_id)) {
         // set current user session
         wp_clear_auth_cookie();
         wp_set_current_user($user_id);

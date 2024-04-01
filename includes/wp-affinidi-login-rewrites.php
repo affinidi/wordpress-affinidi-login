@@ -43,11 +43,13 @@ class Affinidi_Login_Rewrites
     public function template_redirect_intercept(): void
     {
         $activated = absint($this->admin_options->active);
+
         if (!$activated) {
             return;
         }
+        
         global $wp_query;
-        $auth = $wp_query->get('auth');
+        $auth = sanitize_text_field($wp_query->get('auth'));
 
         if ($auth !== '') {
             // affinidi will add another ? to the uri, this will make the value of auth like this : affinidi?code=c9550137370a99bc2137
@@ -64,7 +66,7 @@ class Affinidi_Login_Rewrites
         }
 
         global $pagenow;
-        $message = $wp_query->get('message');
+        $message = sanitize_text_field($wp_query->get('message'));
         if ($pagenow == 'index.php' && isset($message)) {
             require_once(AFFINIDI_PLUGIN_DIR . '/templates/wp-affinidi-login-error-msg.php');
         }
