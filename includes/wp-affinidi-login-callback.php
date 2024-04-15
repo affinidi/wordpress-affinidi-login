@@ -61,11 +61,6 @@ if (!isset($_GET['code']) && !isset($_GET['error_description']) && !isset($_GET[
 
 // Check for error 
 if (empty($_GET['code']) && !empty($_GET['error_description'])) {
-    // set error desc
-    $log_message = sprintf("Affinidi Login: %s",
-        sanitize_text_field($_GET['error_description'])
-    );
-    affinidi_login_write_log($log_message);
     // redirect user with error code
     wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
     
@@ -101,9 +96,6 @@ if (!empty($auth_code)) {
     );
 
     if (is_wp_error($response)) {
-        // log error description
-        $error_message = sanitize_text_field($response->get_error_message());
-        affinidi_login_write_log($error_message);
         // redirect user with error code
         wp_safe_redirect(wp_login_url() . "?message=wp_error_affinidi_login");
         exit;
@@ -112,12 +104,6 @@ if (!empty($auth_code)) {
     $tokens = json_decode(wp_remote_retrieve_body($response));
 
     if (isset($tokens->error)) {
-        // log error description on server side
-        $log_message = sprintf("Affinidi Login: error=%s&error_description=%s",
-            sanitize_text_field($tokens->error),
-            sanitize_text_field($tokens->error_description)
-        );
-        affinidi_login_write_log($log_message);
         // redirect user with error code
         wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
         exit;

@@ -96,15 +96,3 @@ function affinidi_login_extract_prop($data) {
     // return sanitized user info
     return $user_info;
 }
-
-/**
- * For security reason, we don't want to expose error description to FE,
- * instead give developers to view the full error via PHP Log
- */
-function affinidi_login_write_log ( $log )  {
-    if ( is_array( $log ) || is_object( $log ) ) {
-        error_log( print_r( $log, true ) );
-    } else {
-        error_log( $log );
-    }
-}

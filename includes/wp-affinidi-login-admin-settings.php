@@ -75,36 +75,36 @@ class Affinidi_Login_Admin_Settings
             <div class="admin-settings-header">
                 <h1>Affinidi Login</h1>
                 <a class="affinidi-login-doc" href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/" target="_blank">
-                    Documentation
+                    <?php esc_html_e('Documentation', 'affinidi-login'); ?>
                 </a>
             </div>
             <div class="admin-settings-inside">
-                <p>This plugin is meant to be used with <a href="https://www.affinidi.com/product/affinidi-login" target="_blank">Affinidi Login</a> and uses <a href="https://oauth.net/2/pkce/" target="_blank">PKCE</a> extension of OAuth 2.0 standard.</p>
+                <p><?php esc_html_e('This plugin is meant to be used with', 'affinidi-login'); ?> <a href="https://www.affinidi.com/product/affinidi-login" target="_blank">Affinidi Login</a> and uses <a href="https://oauth.net/2/pkce/" target="_blank">PKCE</a> extension of OAuth 2.0 standard.</p>
                 <p>
-                    <strong>NOTE:</strong> If you want to add a
-                    custom link anywhere in your theme simply link to
+                    <strong>NOTE:</strong> <?php esc_html_e('If you want to add a
+                    custom link anywhere in your theme simply link to', 'affinidi-login'); ?>
                     <strong><?php echo esc_url(site_url('?auth=affinidi')); ?></strong>
-                    if the user is not logged in.
+                    <?php esc_html_e('if the user is not logged in.', 'affinidi-login'); ?>
                 </p>
                 <div id="accordion">
-                    <h3>Step 1: Setup</h3>
+                    <h3><?php esc_html_e('Step 1: Setup', 'affinidi-login'); ?></h3>
                     <div>
                         <strong>Create a Login Configuration</strong>
                         <ol>
                             <li>Login to <a
                                         href="https://portal.affinidi.com" target="_blank">Affinidi Portal</a> and go to the Affinidi Login service.
                             </li>
-                            <li>Create a Login Configuration and set the following fields:
+                            <li><?php esc_html_e('Create a Login Configuration and set the following fields:', 'affinidi-login'); ?>
                                 <p>
                                 <strong>Redirect URIs:</strong>
                                 <code><?php echo esc_url(site_url('?auth=affinidi')); ?></code></p>
                                 <p>
                                 <strong>Auth method:</strong> <code>None</code></p>
                             </li>
-                            <li>Copy and paste the Client ID and Issuer URL in Step 2 below.</li>
+                            <li><?php esc_html_e('Copy and paste the Client ID and Issuer URL in Step 2 below.', 'affinidi-login') ?></li>
                         </ol>
                     </div>
-                    <h3 id="sso-configuration">Step 2: Configure</h3>
+                    <h3 id="sso-configuration"><?php esc_html_e('Step 2: Configure', 'affinidi-login'); ?></h3>
                     <div>
                         <form method="post" action="options.php">
                             <?php settings_fields($this->option_name); ?>
@@ -119,7 +119,7 @@ class Affinidi_Login_Admin_Settings
                                 </tr>
 
                                 <tr valign="top">
-                                    <th scope="row">Client ID</th>
+                                    <th scope="row"><?php esc_html_e('Client ID', 'affinidi-login'); ?></th>
                                     <td>
                                         <input type="text" class="regular-text" name="<?php echo esc_html($this->option_name); ?>[client_id]" min="10"
                                             value="<?php echo esc_html($this->admin_options->client_id); ?>"/>
@@ -127,16 +127,16 @@ class Affinidi_Login_Admin_Settings
                                 </tr>
 
                                 <tr valign="top">
-                                    <th scope="row">Issuer URL</th>
+                                    <th scope="row"><?php esc_html_e('Issuer URL', 'affinidi-login'); ?></th>
                                     <td>
                                         <input type="text" class="regular-text" name="<?php echo esc_html($this->option_name); ?>[backend]" min="10"
                                             value="<?php echo esc_html($this->admin_options->backend); ?>"/>
-                                        <p class="description">Example: https://[YOUR_PROJECT_ID]].apse1.login.affinidi.io</p>
+                                        <p class="description"><?php esc_html_e('Example:', 'affinidi-login'); ?> https://[YOUR_PROJECT_ID]].apse1.login.affinidi.io</p>
                                     </td>
                                 </tr>
 
                                 <tr valign="top">
-                                    <th scope="row">Redirect to the dashboard after signing in</th>
+                                    <th scope="row"><?php esc_html_e('Redirect to the dashboard after signing in', 'affinidi-login'); ?></th>
                                     <td>
                                         <input type="checkbox"
                                             name="<?php echo esc_html($this->option_name); ?>[redirect_to_dashboard]"
@@ -144,7 +144,7 @@ class Affinidi_Login_Admin_Settings
                                     </td>
                                 </tr>
                                 <tr valign="top">
-                                    <th scope="row">Restrict flow to log in only (new users will not be allowed to signup)</th>
+                                    <th scope="row"><?php esc_html_e('Restrict flow to log in only (new users will not be allowed to signup)', 'affinidi-login'); ?></th>
                                     <td>
                                         <input type="checkbox"
                                             name="<?php echo esc_html($this->option_name) ?>[login_only]"
@@ -153,7 +153,7 @@ class Affinidi_Login_Admin_Settings
                                 </tr>
                             </table>
                             <p class="submit">
-                                <input type="submit" class="button-primary" value="<?php esc_html_e('Save Changes') ?>"/>
+                                <input type="submit" class="button-primary" value="<?php esc_html_e('Save Changes', 'affinidi-login'); ?>"/>
                             </p>
                     </div>
 
