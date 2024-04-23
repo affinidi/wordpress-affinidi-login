@@ -8,16 +8,19 @@ defined('ABSPATH') or die('No script kiddies please!');
  */
 class Affinidi
 {
-    public $version = '1.0.0';
+    public $version = '1.1.0';
 
     public static $_instance = null;
 
     protected $default_settings = [
-        'active'               => 0,
         'client_id'            => '',
         'backend'              => '',
-        'redirect_to_dashboard'=> 0,
-        'login_only'           => 0,
+        'redirect_user_origin' => 0,
+        'enable_ecommerce_support' => '',
+        'ecommerce_sync_address_info' => 'billing',
+        'ecommerce_show_al_button' => 'top_form',
+        'affinidi_login_loginform_header' => 'Log in passwordless with',
+        'affinidi_login_regform_header' => 'Sign up seamlessly with',
     ];
 
     public function __construct()

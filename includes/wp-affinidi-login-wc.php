@@ -67,7 +67,7 @@ class Affinidi_Login_WooCommerce {
             <div>%s</div>
             </div>',
             esc_html($this->admin_options->affinidi_login_loginform_header),
-            affinidi_login_button_shortcode(array())
+            affinidi_login_button_shortcode()
         );
     
         echo wp_kses_post($affinidi_login_form_button);
@@ -81,7 +81,7 @@ class Affinidi_Login_WooCommerce {
             <div>%s</div>
             </div>',
             esc_html($this->admin_options->affinidi_login_regform_header),
-            affinidi_login_button_shortcode(array())
+            affinidi_login_button_shortcode()
         );
     
         echo wp_kses_post($affinidi_login_form_button);

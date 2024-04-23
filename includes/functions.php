@@ -35,7 +35,7 @@ add_action('login_message', 'affinidi_login_form_button');
  *
  * @return [type]       [description]
  */
-function affinidi_login_button_shortcode($atts)
+function affinidi_login_button_shortcode($atts = array())
 {
 
     if (is_user_logged_in()) {
@@ -46,7 +46,7 @@ function affinidi_login_button_shortcode($atts)
 
     $a = shortcode_atts([
         'title'  => 'Affinidi Login',
-        'class'  => 'button',
+        'class'  => 'affinidi-login',
         'target' => '_self',
         'text'   => 'Affinidi Login'
     ], $atts);

@@ -28,7 +28,7 @@ $user_redirect = home_url();
 // Check for error, ensure state has value
 if (empty($_GET['state'])) {
     // redirect user with error code
-    wp_safe_redirect($user_redirect . "?message=affinidi_login_failed_empty_state");
+    wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed_empty_state'), $user_redirect));
     exit;
 }
 
@@ -65,7 +65,7 @@ if (!isset($_GET['code']) && !isset($_GET['error_description'])) {
 // Check for error 
 if (empty($_GET['code']) && !empty($_GET['error_description'])) {
     // redirect user with error code
-    wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
+    wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), $user_redirect));
     
     exit;
 }
@@ -87,7 +87,7 @@ if (!empty($redirect_to) && !empty($redirect_to[$state]) && !empty($redirect_to[
 // Check for error 
 if (empty($auth_code) && !empty($_GET['error_description'])) {
     // redirect user with error code
-    wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), $user_redirect));
+    wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
     exit;
 }
 
@@ -117,7 +117,7 @@ if (!empty($auth_code)) {
 
     if (is_wp_error($response)) {
         // redirect user with error code
-        wp_safe_redirect(wp_login_url() . "?message=wp_error_affinidi_login");
+        wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
         exit;
     }
 
@@ -125,7 +125,7 @@ if (!empty($auth_code)) {
 
     if (isset($tokens->error)) {
         // redirect user with error code
-        wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
+        wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
         exit;
     }
     // parse ID Token from Affinidi Login response
@@ -141,7 +141,7 @@ if (!empty($auth_code)) {
 
     if (email_exists($userInfo['email']) == false) {
         if (affinidi_login_users_can_signup() == 0) {
-            wp_safe_redirect(wp_login_url() . '?message=affinidi_login_only');
+            wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_only'), esc_url($user_redirect)));
             exit;
         }
 
@@ -160,7 +160,7 @@ if (!empty($auth_code)) {
 
         if (empty($user_id)) {
             // redirect user with error code
-            wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
+            wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
             exit;
         }
 
@@ -191,13 +191,7 @@ if (!empty($auth_code)) {
 
         if (!$user) {
             // redirect user with error code
-            wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
-            exit;
-        }
-
-        if (empty($user->ID)) {
-            // redirect user with error code
-            wp_safe_redirect(wp_login_url() . "?message=affinidi_login_failed");
+            wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
             exit;
         }
 
