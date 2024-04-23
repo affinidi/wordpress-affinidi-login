@@ -92,20 +92,20 @@ class Affinidi
      * Register and enqueue a custom stylesheet in the WordPress admin.
      */
     public function affinidi_login_enqueue_admin_scripts() {
-        wp_register_style( 'affinidi_login_admin_css', plugins_url('/assets/css/admin.css', __FILE__), false, '1.0.0' );
+        wp_register_style( 'affinidi_login_admin_css', plugins_url('/assets/css/admin.css', __FILE__), false, $this->version );
         wp_enqueue_style( 'affinidi_login_admin_css' );
 
-        wp_register_script( 'affinidi_login_admin_js', plugins_url('/assets/js/admin.js', __FILE__), false, '1.0.0', true );
+        wp_register_script( 'affinidi_login_admin_js', plugins_url('/assets/js/admin.js', __FILE__), false, $this->version, true );
         wp_enqueue_script( 'affinidi_login_admin_js' );
     }
 
     public function affinidi_login_enqueue_fe_scripts()
     {
         // Register a CSS stylesheet.
-        wp_register_style('affinidi_login_fe_css', plugins_url('/assets/css/affinidi-login.css', __FILE__), false, '1.0.0');
+        wp_register_style('affinidi_login_fe_css', plugins_url('/assets/css/affinidi-login.css', __FILE__), false, $this->version);
         wp_enqueue_style( 'affinidi_login_fe_css' );
         // Register a new script.
-        wp_register_script('affinidi_login_fe_js', plugins_url('/assets/js/affinidi-login.js', __FILE__), array(), '1.0.0', true);
+        wp_register_script('affinidi_login_fe_js', plugins_url('/assets/js/affinidi-login.js', __FILE__), array(), $this->version, true);
         wp_enqueue_script( 'affinidi_login_fe_js' );
     }
 
