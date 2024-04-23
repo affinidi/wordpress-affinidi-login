@@ -16,16 +16,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$admin_options = new Affinidi_Login_Admin_Options();
+$idtoken_parser = new Affinidi_Login_IDToken();
+
 // default to homepage if the state not found or expired
 $user_redirect = home_url();
 
+// Not processing form or storing data.
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
 // Check for error, ensure state has value
 if (empty($_GET['state'])) {
-    // log error description on server side
-    $log_message = "Affinidi Login: state is empty".PHP_EOL;
-    error_log($log_message);
     // redirect user with error code
-    wp_safe_redirect($user_redirect . "?message=affinidi_login_failed");
+    wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed_empty_state'), $user_redirect));
     exit;
 }
 
@@ -48,51 +51,60 @@ if (!isset($_GET['code']) && !isset($_GET['error_description'])) {
         'oauth'                 => 'authorize',
         'response_type'         => 'code',
         'scope'                 => 'openid',
-        'client_id'             => affinidi_get_option('client_id'),
+        'client_id'             => $admin_options->client_id,
         'redirect_uri'          => site_url('?auth=affinidi'),
         'state'                 => urlencode($state),
         'code_challenge'        => $code_challenge,
         'code_challenge_method' => 'S256',
     ];
     $params = http_build_query($params);
-    wp_redirect(affinidi_get_option('backend') . '/oauth2/auth?' . $params);
+    wp_redirect(sanitize_url($admin_options->backend) . '/oauth2/auth?' . $params);
     exit;
 }
 
+// Check for error 
+if (empty($_GET['code']) && !empty($_GET['error_description'])) {
+    // redirect user with error code
+    wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), $user_redirect));
+    
+    exit;
+}
+
+// grab the code
+$auth_code = sanitize_text_field($_GET['code']);
 // retrieve state and get the transient info for redirect
-$state      = sanitize_text_field($_GET['state']);
+$state = sanitize_text_field($_GET['state']);
 $redirect_to = get_transient("affinidi_user_redirect_to".$state);
+
 // check if the state exists
 if (!empty($redirect_to) && !empty($redirect_to[$state]) && !empty($redirect_to[$state]['redirect_to'])) {
     // set the redirect url based on state
-    $user_redirect = $redirect_to[$state]['redirect_to'];
+    $user_redirect = sanitize_url($redirect_to[$state]['redirect_to']);
     // delete the transient after
     delete_transient("affinidi_user_redirect_to".$state);
 }
 
 // Check for error 
-if (empty($_GET['code']) && !empty($_GET['error_description'])) {
-    // log error description on server side
-    $log_message = "Affinidi Login: error={$_GET['error']}&error_description={$_GET['error_description']}".PHP_EOL;
-    error_log($log_message);
+if (empty($auth_code) && !empty($_GET['error_description'])) {
     // redirect user with error code
-    wp_safe_redirect($user_redirect . "?message=affinidi_login_failed&error={$_GET['error']}");
+    wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
     exit;
 }
 
-// Handle the callback from the backend is there is one.
-if (!empty($_GET['code'])) {
+// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-    $code       = sanitize_text_field($_GET['code']);
-    $backend    = affinidi_get_option('backend') . '/oauth2/token';
+// Handle the callback from the backend is there is one.
+if (!empty($auth_code)) {
+
+    $backend    = sanitize_url($admin_options->backend) . '/oauth2/token';
 
     // retrieve the code verifier from the SESSION
-    $code_verifier = $_SESSION[$state];
+    $code_verifier = sanitize_text_field($_SESSION[$state]);
 
     $request_body = [
         'grant_type'    => 'authorization_code',
-        'code'          => $code,
-        'client_id'     => affinidi_get_option('client_id'),
+        'code'          => $auth_code,
+        'client_id'     => $admin_options->client_id,
         'code_verifier' => $code_verifier,
         'redirect_uri'  => site_url('?auth=affinidi')
     ];
@@ -104,39 +116,32 @@ if (!empty($_GET['code'])) {
     );
 
     if (is_wp_error($response)) {
-        // log error description
-        $error_message = $response->get_error_message();
-        error_log($error_message);
         // redirect user with error code
-        wp_safe_redirect($user_redirect . "?message=wp_error_affinidi_login");
+        wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
         exit;
     }
 
     $tokens = json_decode(wp_remote_retrieve_body($response));
 
     if (isset($tokens->error)) {
-        // log error description on server side
-        $log_message = "Affinidi Login: error={$tokens->error}&error_description={$tokens->error_description}".PHP_EOL;
-        error_log($log_message);
         // redirect user with error code
-        wp_safe_redirect($user_redirect . "?message=affinidi_login_failed&error={$tokens->error}");
+        wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
         exit;
     }
-
-    $access_token = $tokens->access_token;
+    // parse ID Token from Affinidi Login response
     $id_token = $tokens->id_token;
     $info = json_decode(base64_decode(str_replace('_', '/', str_replace('-', '+', explode('.', $id_token)[1]))), true);
 
     // extract user info
-    $userInfo = extract_user_info($info);
+    $userInfo = $idtoken_parser->extract_user_info($info);
     // extract contact info
-    $contactInfo = extract_contact_info($info);
+    $contactInfo = $idtoken_parser->extract_contact_info($info);
     
     $user_id = null;
 
     if (email_exists($userInfo['email']) == false) {
-        if (wp_users_can_signup() == 0) {
-            wp_safe_redirect(home_url() . '?message=affinidi_login_only');
+        if (affinidi_login_users_can_signup()) {
+            wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_only'), esc_url($user_redirect)));
             exit;
         }
 
@@ -144,20 +149,31 @@ if (!empty($_GET['code'])) {
         $random_password = wp_generate_password($length = 16, $extra_special_chars = true);
         $user_data = [
             'user_email'   => $userInfo['email'],
-            'user_login'   => $userInfo['email'], // default to mail if not present
+            'user_login'   => $userInfo['email'], // default to mail
             'user_pass'    => $random_password,
             'last_name'    => $userInfo['last_name'],
-            'first_name'    => $userInfo['first_name'],
+            'first_name'   => $userInfo['first_name'],
             'display_name' => (!empty($userInfo['display_name']) ? $userInfo['display_name'] : $userInfo['email']) // default to mail if not present
         ];
 
         $user_id = wp_insert_user($user_data);
 
-        // set Billing and Shipping Address from Vault
-        sync_address_info($user_id, $userInfo, $contactInfo, true);
+        if (empty($user_id)) {
+            // redirect user with error code
+            wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
+            exit;
+        }
+
+        if (affinidi_login_wc_active()) {
+            // instantiate WC Affinidi Login
+            $affinidi_login_wc = new Affinidi_Login_WooCommerce($admin_options);
+            // set Billing and Shipping Address from Vault
+            $affinidi_login_wc->sync_customer_info($user_id, $userInfo, $contactInfo, true);
+        }
+        
         // Trigger new user created action so that there can be modifications to what happens after the user is created.
         // This can be used to collect other information about the user.
-        do_action('affinidi_user_created', $info, 1);
+        do_action('affinidi_user_created', $userInfo, 1);
 
     } else {
         // Already Registered... Log the User In using ID or Email
@@ -168,22 +184,32 @@ if (!empty($_GET['code'])) {
          * we should check the user by email. This may be the case when the users are preregistered outside of OAuth
          */
         if (!$user) {
-             // Get the user by name
+             // Get the user by email using login
             $user = get_user_by('login', $userInfo['email']);
+        }
+
+        if (!$user) {
+            // redirect user with error code
+            wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_failed'), esc_url($user_redirect)));
+            exit;
         }
 
         $user_id = $user->ID;
 
-        // sync the address from Vault
-        sync_address_info($user_id, $userInfo, $contactInfo, false);
+        if (affinidi_login_wc_active()) {
+            // instantiate WC Affinidi Login
+            $affinidi_login_wc = new Affinidi_Login_WooCommerce($admin_options);
+            // set Billing and Shipping Address from Vault
+            $affinidi_login_wc->sync_customer_info($user_id, $userInfo, $contactInfo, false);
+        }
 
         // Trigger action when a user is logged in.
         // This will help allow extensions to be used without modifying the core plugin.
-        do_action('affinidi_user_login', $info, 1);
+        do_action('affinidi_user_login', $userInfo, 1);
     }
 
     // Did we retrieved or created the user successfully?
-    if ($user_id) {
+    if (!empty($user_id)) {
         // set current user session
         wp_clear_auth_cookie();
         wp_set_current_user($user_id);
@@ -195,6 +221,3 @@ if (!empty($_GET['code'])) {
         }
     }
 }
-
-
-

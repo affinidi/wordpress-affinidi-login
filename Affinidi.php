@@ -8,7 +8,7 @@ defined('ABSPATH') or die('No script kiddies please!');
  */
 class Affinidi
 {
-    public $version = '1.0.0';
+    public $version = '1.1.0';
 
     public static $_instance = null;
 
@@ -26,7 +26,6 @@ class Affinidi
     public function __construct()
     {
         add_action('init', [__CLASS__, 'includes']);
-        //add_action('init', [__CLASS__, 'custom_login']); // when activated, Affinidi Login will become the only login option
     }
 
     /**
@@ -50,9 +49,12 @@ class Affinidi
      */
     public static function includes()
     {
-        require_once(AFFINIDI_PLUGIN_DIR . '/includes/functions.php');
         require_once(AFFINIDI_PLUGIN_DIR . '/includes/wp-affinidi-login-admin-options.php');
+        require_once(AFFINIDI_PLUGIN_DIR . '/includes/wp-affinidi-login-admin-settings.php');
         require_once(AFFINIDI_PLUGIN_DIR . '/includes/wp-affinidi-login-rewrites.php');
+        require_once(AFFINIDI_PLUGIN_DIR . '/includes/wp-affinidi-login-idtoken.php');
+        require_once(AFFINIDI_PLUGIN_DIR . '/includes/wp-affinidi-login-wc.php');
+        require_once(AFFINIDI_PLUGIN_DIR . '/includes/functions.php');
     }
 
     /**
@@ -60,33 +62,19 @@ class Affinidi
      */
     public function setup()
     {
-        $options = get_option('affinidi_options');
-        if (!isset($options['backend'])) {
+        $admin_options = get_option('affinidi_options');
+
+        if (!isset($admin_options['backend'])) {
             update_option('affinidi_options', $this->default_settings);
         }
-        $this->install();
-    }
 
-    /**
-     * When wp-login.php was visited, redirect to the login page of affinidi
-     *
-     * @return void
-     */
-    public static function custom_login()
-    {
-        global $pagenow;
-        $activated = absint(affinidi_get_option('active'));
-        if ('wp-login.php' == $pagenow && $_GET['action'] != 'logout' && $activated) {
-            $url = get_affinidi_login_url();
-            wp_redirect($url);
-            exit();
-        }
+        $this->install();
     }
 
     public function logout()
     {
         wp_redirect(home_url());
-        die();
+        exit();
     }
 
     /**
@@ -98,9 +86,27 @@ class Affinidi
     {
         // Registers the script if $src provided (does NOT overwrite), and enqueues it.
         wp_enqueue_script('jquery-ui-accordion');
-        // Registers the style if source provided (does NOT overwrite) and enqueues.
-        wp_enqueue_style('affinidi_admin');
-        wp_enqueue_script('affinidi_admin');
+    }
+
+    /**
+     * Register and enqueue a custom stylesheet in the WordPress admin.
+     */
+    public function affinidi_login_enqueue_admin_scripts() {
+        wp_register_style( 'affinidi_login_admin_css', plugins_url('/assets/css/admin.css', __FILE__), false, $this->version );
+        wp_enqueue_style( 'affinidi_login_admin_css' );
+
+        wp_register_script( 'affinidi_login_admin_js', plugins_url('/assets/js/admin.js', __FILE__), false, $this->version, true );
+        wp_enqueue_script( 'affinidi_login_admin_js' );
+    }
+
+    public function affinidi_login_enqueue_fe_scripts()
+    {
+        // Register a CSS stylesheet.
+        wp_register_style('affinidi_login_fe_css', plugins_url('/assets/css/affinidi-login.css', __FILE__), false, $this->version);
+        wp_enqueue_style( 'affinidi_login_fe_css' );
+        // Register a new script.
+        wp_register_script('affinidi_login_fe_js', plugins_url('/assets/js/affinidi-login.js', __FILE__), array(), $this->version, true);
+        wp_enqueue_script( 'affinidi_login_fe_js' );
     }
 
     /**
