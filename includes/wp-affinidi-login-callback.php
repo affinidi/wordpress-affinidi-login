@@ -140,7 +140,7 @@ if (!empty($auth_code)) {
     $user_id = null;
 
     if (email_exists($userInfo['email']) == false) {
-        if (affinidi_login_users_can_signup()) {
+        if (affinidi_login_users_can_signup() == 0) {
             wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_only'), esc_url($user_redirect)));
             exit;
         }
