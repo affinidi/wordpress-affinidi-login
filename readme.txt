@@ -4,7 +4,7 @@ Tags: authentication, passwordless, multi-factor, sso, ecommerce
 Requires at least: 6.4
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: MIT
 License URI: https://github.com/affinidi/wordpress-affinidi-login/blob/main/LICENSE
 
