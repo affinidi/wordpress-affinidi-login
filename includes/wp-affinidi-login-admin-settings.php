@@ -142,7 +142,7 @@ class Affinidi_Login_Admin_Settings
                                     </td>
                                 </tr>
                                 <tr valign="top">
-                                    <th scope="row">Restrict flow to log in only (new users will not be allowed to signup)</th>
+                                    <th scope="row">Restrict user login flow</th>
                                     <td>
                                         <?php
                                         if (affinidi_login_users_can_signup()) {
