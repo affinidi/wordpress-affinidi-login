@@ -140,7 +140,7 @@ if (!empty($auth_code)) {
     $user_id = null;
 
     if (email_exists($userInfo['email']) == false) {
-        if (affinidi_login_users_can_signup() == 0) {
+        if (affinidi_login_users_can_signup()) {
             wp_safe_redirect(add_query_arg(array('message' => 'affinidi_login_only'), esc_url($user_redirect)));
             exit;
         }
@@ -149,7 +149,7 @@ if (!empty($auth_code)) {
         $random_password = wp_generate_password($length = 16, $extra_special_chars = true);
         $user_data = [
             'user_email'   => $userInfo['email'],
-            'user_login'   => (!empty($userInfo['first_name']) ? $userInfo['first_name'] : $userInfo['email']), // default to mail if not present
+            'user_login'   => $userInfo['email'], // default to mail
             'user_pass'    => $random_password,
             'last_name'    => $userInfo['last_name'],
             'first_name'   => $userInfo['first_name'],
@@ -184,10 +184,9 @@ if (!empty($auth_code)) {
          * we should check the user by email. This may be the case when the users are preregistered outside of OAuth
          */
         if (!$user) {
-             // Get the user by name
-            $user = get_user_by('login', $userInfo['given_name']);
+             // Get the user by email using login
+            $user = get_user_by('login', $userInfo['email']);
         }
-
 
         if (!$user) {
             // redirect user with error code
