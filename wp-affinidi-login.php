@@ -18,7 +18,7 @@
  * Plugin Name:       Affinidi Login - Passwordless Authentication
  * Plugin URI:        https://github.com/affinidi/wordpress-affinidi-login
  * Description:       A paradigm shift in the registration and sign-in process, Affinidi Login is a game-changing solution for developers. With our revolutionary passwordless authentication solution your user's first sign-in doubles as their registration, and all the necessary data for onboarding can be requested during this streamlined sign-in/signup process. End users are in full control, ensuring that they consent to the information shared in a transparent and user-friendly manner. This streamlined approach empowers developers to create efficient user experiences with data integrity, enhanced security and privacy, and ensures compatibility with industry standards.
- * Version:           1.1.1
+ * Version:           1.1.2
  * Requires at least: 6.4
  * Tested up to:      6.5
  * Requires PHP:      7.4
