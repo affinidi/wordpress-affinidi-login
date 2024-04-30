@@ -40,13 +40,27 @@ class Affinidi_Login_IDToken {
     {
         // get list of countries for transformation
         include_once(AFFINIDI_PLUGIN_DIR . '/templates/countries-list.php');
+        // extract phone number from top level
+        $phoneNumber = $this->extract_claim($info, 'phone_number');
+        // do we have the address info 
+        if (!isset($info['address'])) {
+            // return empty
+            return array(
+                'address_1' => '',
+                'city' => '',
+                'state' => '',
+                'postcode' => '',
+                'country' => '',
+                'phone' => $phoneNumber
+            );
+        }
+
         // extract user info
         $streetAddress = $this->extract_claim($info['address'], 'street_address');
         $locality = $this->extract_claim($info['address'], 'locality');
         $region = $this->extract_claim($info['address'], 'region');
         $postalCode = $this->extract_claim($info['address'], 'postal_code');
         $country = $this->extract_claim($info['address'], 'country');
-        $phoneNumber = $this->extract_claim($info, 'phone_number');
     
         // get the country code
         $country = sanitize_text_field(array_search($country, $countries_list));

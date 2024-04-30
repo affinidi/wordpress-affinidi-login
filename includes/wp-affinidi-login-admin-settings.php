@@ -106,7 +106,7 @@ class Affinidi_Login_Admin_Settings
                             <li>Copy the <strong>Client ID</strong> and <strong>Issuer URL</strong> and paste it in Step 2 below.</li>
                             <li>
                                 <p>Modify the <strong>Presentation Definition</strong> and <strong>ID Token Mapping</strong> using <a href="https://docs.affinidi.com/labs/3rd-party-plugins/passwordless-authentication-for-wordpress/#presentation-definition-and-id-token-mapping" target="_blank">this template.</a></p>
-                                <p><em>If you have activated a supported E-Commerce plugin on this WordPress site, use the template for E-Commerce.', 'affinid-login'); ?></em></p>
+                                <p><em>If you have activated a supported E-Commerce plugin on this WordPress site, use the template for E-Commerce.</em></p>
                             </li>
                         </ol>
                     </div>
